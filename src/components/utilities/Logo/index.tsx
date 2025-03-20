@@ -15,8 +15,8 @@ const Logo: React.FC<LogoProps> = ({ src, alt, rootStyles = {}, isLink, link }) 
     <Box
       sx={{
         position: "relative",
-        height: "10rem",
-        width: "10rem",
+        height: "2rem",
+        width: "6rem",
 
         ...rootStyles,
 
@@ -26,11 +26,11 @@ const Logo: React.FC<LogoProps> = ({ src, alt, rootStyles = {}, isLink, link }) 
       {isLink && link ? (
         <Link to={link}>
           <Box style={{ cursor: "pointer" }}>
-            <img src={src ?? "/assets/logos/Medlivery_Vertical.png"} alt={alt ?? "Medlivery"} />
+            <img src={src ?? "/assets/logos/V_Care_logo.png"} alt={alt ?? "V-Care"} />
           </Box>
         </Link>
       ) : (
-        <img src={src ?? "/assets/logos/Medlivery_Vertical.png"} alt={alt ?? "Medlivery"} />
+        <img src={src ?? "/assets/logos/V_Care_logo.png"} alt={alt ?? "V-Care"} />
       )}
     </Box>
   );
