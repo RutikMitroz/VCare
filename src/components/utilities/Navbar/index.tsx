@@ -12,8 +12,20 @@ const Navbar = () => {
   const [selectedItem, setSelectedItem] = useState('Enquiry'); // Default selected item
 
   return (
-    <AppBar position="fixed" sx={{ backgroundColor: '#1D434C' }}>
-      <Toolbar>
+    <AppBar 
+      position="fixed" 
+      sx={{ 
+        backgroundColor: '#1D434C', 
+        top: '64px',
+        minHeight: '55px',
+      }}
+    >
+      <Toolbar 
+        sx={{ 
+          minHeight: '55px !important',
+          padding: '0 16px',
+        }}
+      >
         {menuItems.map((item, index) => (
           <Box
             key={index}
@@ -23,7 +35,7 @@ const Navbar = () => {
               alignItems: 'center',
               mx: 1,
               cursor: 'pointer',
-              padding: '12px 12px',
+              padding: '6px 12px',
               borderRadius: '24px',
               backgroundColor: selectedItem === item.text ? '#0A2732' : 'transparent',
               transition: 'all 0.3s ease',
@@ -39,7 +51,7 @@ const Navbar = () => {
                 color: selectedItem === item.text ? '#60CA72' : 'inherit',
                 padding: '2px',
                 '& .MuiSvgIcon-root': {
-                  fontSize: '18px',
+                  fontSize: '16px',
                 }
               }}
             >
@@ -50,7 +62,7 @@ const Navbar = () => {
               sx={{
                 ml: 0.5,
                 whiteSpace: 'nowrap',
-                fontSize: '14px',
+                fontSize: '13px',
                 opacity: selectedItem === item.text ? 1 : 0.85,
                 color: selectedItem === item.text ? '#60CA72' : 'inherit',
               }}
