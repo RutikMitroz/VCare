@@ -19,7 +19,7 @@ const RenderEnquiry = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" ,p: "2rem"}}>
+    <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" }}>
       <Box sx={{width: "25%",backgroundColor:"white",borderRadius:"16px",padding:"16px",border:"2px solid #E0E0E0"}}>
         <FormControl fullWidth sx={{ mb: 2 }}>
           <Select
@@ -47,7 +47,7 @@ const RenderEnquiry = () => {
         </FormControl>
         <Sidebar />
       </Box>
-      <Box>
+      <Box sx={{width: "75%"}}>
         <Box
           sx={{
             margin: '0.5rem 0 1rem 0',
@@ -59,13 +59,12 @@ const RenderEnquiry = () => {
           <TextField
             placeholder="Search"
             variant="outlined"
-            size="small"
             sx={{
               width: '30%',
               '& .MuiOutlinedInput-root': {
                 borderRadius: '8px',
                 backgroundColor: '#FFFFFF',
-                height: '2.5rem',
+                height: '3.2rem',
                 '& fieldset': {
                   borderColor: '#E0E0E0',
                 },
@@ -99,10 +98,10 @@ const RenderEnquiry = () => {
             size="small"
             startIcon={<AddIcon sx={{ fontSize: '16px' }} />}
             sx={{
-              backgroundColor: '#00695C',
+              backgroundColor: '#1D434C',
               color: '#FFFFFF',
               borderRadius: '8px',
-              padding: '6px 12px',
+              padding: '16px 16px',
               textTransform: 'capitalize',
               fontWeight: 'bold',
               fontSize: '14px',

@@ -24,7 +24,9 @@ const Layout: React.FC<LayoutProps> = ({ children, header = true, wrapInContaine
                         position: "relative",
                         display: "flex",
                         flexDirection: "column",
-                        padding: "64px", // Account for header (64px) + navbar height
+                        py: 2,
+                        px:4,
+                        // padding: "64px", // Account for header (64px) + navbar height
                         minHeight: viewMeasurerContext?.height,
                         backgroundColor: "#EEF3F6",
                     }}
