@@ -1,19 +1,50 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "./Sidebar";
-import { Box, Button } from "@mui/material";
+
+import { Box, Button, FormControl, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+
 
 import AddIcon from '@mui/icons-material/Add';
 import { TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import DataTable from "./DataTable";
 
-
 // import { InputField } from "@medlivery/vulkan-ui";
 
 const RenderEnquiry = () => {
+  const [timeFilter, setTimeFilter] = useState('This Month');
+
+  const handleTimeFilterChange = (event: SelectChangeEvent) => {
+    setTimeFilter(event.target.value);
+  };
+
   return (
     <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" ,p: "2rem"}}>
-      <Box sx={{width: "25%"}}>
+      <Box sx={{width: "25%",backgroundColor:"white",borderRadius:"16px",padding:"16px",border:"2px solid #E0E0E0"}}>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <Select
+            value={timeFilter}
+            onChange={handleTimeFilterChange}
+            sx={{
+              backgroundColor: 'white',
+              '.MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(0, 0, 0, 0.1)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+              },
+              fontSize: '14px',
+              color: '#333',
+            }}
+          >
+            <MenuItem value="This Week">This Week</MenuItem>
+            <MenuItem value="This Month">This Month</MenuItem>
+            <MenuItem value="This Year">This Year</MenuItem>
+          </Select>
+        </FormControl>
         <Sidebar />
       </Box>
       <Box>

@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import { useViewMeasurerContext } from "../../context/ViewMeasurerContext";
 import Header from "../utilities/Header";
 
@@ -16,20 +16,21 @@ const Layout: React.FC<LayoutProps> = ({ children, header = true, wrapInContaine
             {header ? <Header /> : null}
 
             {wrapInContainer === true ? (
-                <Container
+                <Box
                     component="main"
-                    maxWidth="md"
                     sx={{
+                        width: "100%",
                         height: "100%",
                         position: "relative",
                         display: "flex",
                         flexDirection: "column",
+                        padding: "64px", // Account for header (64px) + navbar height
                         minHeight: viewMeasurerContext?.height,
-                        // backgroundColor: "#EEF3F6",
+                        backgroundColor: "#EEF3F6",
                     }}
                 >
                     {children}
-                </Container>
+                </Box>
             ) : (
                 <Box sx={{ minHeight: viewMeasurerContext?.height, height: "100%" }}>{children}</Box>
             )}
