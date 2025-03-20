@@ -1,14 +1,22 @@
+import React from "react";
+import Sidebar from "./Sidebar";
 import { Box, Button } from "@mui/material";
+
 import AddIcon from '@mui/icons-material/Add';
 import { TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import DataTable from "./DataTable";
 
+
+// import { InputField } from "@medlivery/vulkan-ui";
+
 const RenderEnquiry = () => {
   return (
-    <Box >
-      <Box></Box>
-      <Box sx={{ width: "80%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" ,p: "2rem"}}>
+      <Box sx={{width: "25%"}}>
+        <Sidebar />
+      </Box>
+      <Box>
         <Box
           sx={{
             margin: '0.5rem 0 1rem 0',
@@ -74,6 +82,7 @@ const RenderEnquiry = () => {
             }}
           >
             Add Enquiry
+
           </Button>
         </Box>
         <DataTable
@@ -86,7 +95,7 @@ const RenderEnquiry = () => {
         />
       </Box>
     </Box>
-  )
-}
+  );
+};
 
 export default RenderEnquiry;
