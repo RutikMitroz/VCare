@@ -1,17 +1,15 @@
-
 import React from "react";
 import Sidebar from "./Sidebar";
 import { Box, Button } from "@mui/material";
 // import { InputField } from "@medlivery/vulkan-ui";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 import Input from "../utilities/InputField";
 
 const RenderEnquiry = () => {
   return (
-
-    <Box >
-      <Box>
-      <Sidebar />
+    <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" ,p: "2rem"}}>
+      <Box sx={{width: "25%"}}>
+        <Sidebar />
       </Box>
       <Box>
         <Box
@@ -35,12 +33,18 @@ const RenderEnquiry = () => {
               // }}
             />
           </div>
-          <Button size='small' variant="contained" sx={{ textTransform: "capitalize", textAlign: "center" }}> <AddIcon />  Add Enquiry </Button>
+          <Button
+            size="small"
+            variant="contained"
+            sx={{ textTransform: "capitalize", textAlign: "center" }}
+          >
+            {" "}
+            <AddIcon /> Add Enquiry{" "}
+          </Button>
         </Box>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
 export default RenderEnquiry;
-

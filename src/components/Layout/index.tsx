@@ -25,6 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children, header = true, wrapInContaine
                         display: "flex",
                         flexDirection: "column",
                         minHeight: viewMeasurerContext?.height,
+                        // backgroundColor: "#EEF3F6",
                     }}
                 >
                     {children}

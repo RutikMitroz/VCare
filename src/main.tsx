@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@mui/material/styles";
 import App from "./App";
-import {store} from "./redux/store/store";
+import { store } from "./redux/store";
 import ScrollToTop from "./components/utilities/ScrollToTop";
 import theme from "./utils/theme";
 import ViewMeasurerProvider from "./context/ViewMeasurerContext";

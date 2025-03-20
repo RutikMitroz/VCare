@@ -84,9 +84,11 @@
 
 import { AppBar, Toolbar, Typography, IconButton, Avatar, Box, Badge } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import Navbar from '../Navbar';
 
 const Header = () => {
     return (
+        <>
         <AppBar
             position="sticky"
             sx={{
@@ -132,10 +134,12 @@ const Header = () => {
                         alt="User"
                         src="/assets/user.png"
                         sx={{ width: 35, height: 35, cursor: 'pointer' }}
-                    />
+                        />
                 </Box>
             </Toolbar>
         </AppBar>
+        <Navbar />
+                        </>
     );
 };
 
