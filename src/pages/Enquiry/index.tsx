@@ -1,14 +1,16 @@
-import React, { lazy } from "react";
+import  { lazy } from "react";
 import { Helmet } from "react-helmet";
-const rendorEnquiry = lazy(() => import("../../components/_Enquiry"));
+const RendorEnquiry = lazy(() => import("../../components/_Enquiry"));
 const Enquiry = () => {
   return (
     <>
     <Helmet>
-        <title>Enquiry</title>
+        <title>VCare | Enquiry</title>
     </Helmet>
-    <rendorEnquiry/>
+
+    <RendorEnquiry/>
     </>
+  )
 };
 
 export default Enquiry;
