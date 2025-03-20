@@ -111,43 +111,45 @@ const Header = () => {
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            height: "4rem",
+            minHeight: "48px !important",
+            height: "48px",
+            padding: "0 16px",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
             <Box
               component="img"
               src="/assets/logos/V_Care_logo.png"
               alt="Logo"
-              sx={{ height: "40px", width: "auto", cursor: "pointer" }}
+              sx={{ height: "32px", width: "auto", cursor: "pointer" }}
             />
             <Box
               sx={{
-                height: "24px",
+                height: "20px",
                 width: "1px",
                 backgroundColor: "#dcdcdc",
               }}
             />
             <Typography
               sx={{
-                fontSize: "1.2rem",
-                fontWeight: "900",
+                fontSize: "1.5rem",
+                fontWeight: "700",
                 color: "#000",
               }}
             >
               Enquiries
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 4, mr: 4 }}>
-            <IconButton>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mr: 2 }}>
+            <IconButton size="small">
               <Badge badgeContent={1} color="error">
-                <NotificationsIcon sx={{ color: "black", fontSize: "24px" }} />
+                <NotificationsIcon sx={{ color: "black", fontSize: "20px" }} />
               </Badge>
             </IconButton>
             <Avatar
               alt="User"
               src="/assets/user.png"
-              sx={{ width: 35, height: 35, cursor: "pointer" }}
+              sx={{ width: 28, height: 28, cursor: "pointer" }}
             />
           </Box>
         </Toolbar>

@@ -13,16 +13,16 @@ const Navbar = () => {
 
   return (
     <AppBar 
-      position="fixed" 
+      position="sticky" 
       sx={{ 
         backgroundColor: '#1D434C', 
-        top: '64px',
-        minHeight: '55px',
+        top: '48px',
+        minHeight: '48px',
       }}
     >
       <Toolbar 
         sx={{ 
-          minHeight: '55px !important',
+          minHeight: '48px !important',
           padding: '0 16px',
         }}
       >

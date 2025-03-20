@@ -59,7 +59,7 @@ const DataTable = ({
     };
 
     const headerCellStyle = {
-        backgroundColor: "#00695C",
+        backgroundColor: "#1D434C",
         color: "#FFFFFF",
         fontWeight: "bold",
         fontSize: "14px",
