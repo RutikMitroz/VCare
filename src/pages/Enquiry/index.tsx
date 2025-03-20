@@ -1,14 +1,23 @@
-import  { lazy } from "react";
+
 import { Helmet } from "react-helmet";
-const RendorEnquiry = lazy(() => import("../../components/_Enquiry"));
+import Layout from "../../components/Layout";
+import LazyLoadingWrapper from "../../components/utilities/LazyLoadingWrapper";
+import { lazy } from "react";
+
+const RenderEnquiry = lazy(() => import("../../components/_Enquiry"));
 const Enquiry = () => {
   return (
     <>
-    <Helmet>
-        <title>VCare | Enquiry</title>
-    </Helmet>
+      <Helmet>
+        <title>VCare Admin | Enquiry</title>
+      </Helmet>
 
-    <RendorEnquiry/>
+      <Layout>
+        <LazyLoadingWrapper rootStyles={{ minHeight: "calc(100vh - 8rem)" }}>
+          <RenderEnquiry />
+        </LazyLoadingWrapper>
+      </Layout>
+
     </>
   )
 };

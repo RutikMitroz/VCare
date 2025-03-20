@@ -1,44 +1,46 @@
+
 import React from "react";
 import Sidebar from "./Sidebar";
-import { Box, Container } from "@mui/material";
+import { Box, Button } from "@mui/material";
+// import { InputField } from "@medlivery/vulkan-ui";
+import AddIcon from '@mui/icons-material/Add';
+import Input from "../utilities/InputField";
 
-const _Enquiry = () => {
+const RenderEnquiry = () => {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "100%",
-        minHeight: "100vh",
-        backgroundColor: "#EEF3F6",
-        m:0,
-        p:5
-      }}
-    >
-      <Box
-        sx={{
-          width: "20%",
-          minWidth: "280px",
-          backgroundColor: "white",
-          padding: "24px",
-          borderRight: "1px solid rgba(0, 0, 0, 0.12)",
-          height: "100vh",
-          overflowY: "auto",
-          borderRadius: "12px",
-        }}
-      >
-        <Sidebar />
+
+    <Box >
+      <Box>
+      <Sidebar />
       </Box>
-      <Box
-        sx={{
-          flex: 1,
-          padding: "24px",
-          overflowY: "auto",
-        }}
-      >
-        Table
+      <Box>
+        <Box
+          sx={{
+            margin: ".5rem 0 1rem 0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: "4.5rem",
+          }}
+        >
+          <div className="w-[25rem]">
+            <Input
+              placeholder="Search tests..."
+              // value={query}
+              // endIcon={searchParams.get("q") ? <X /> : null}
+              // onEndIconClick={() => handleSearch("")}
+              // onChange={(e) => {
+              //   setQuery(e.target.value);
+              //   debouncedSearch(e.target.value);
+              // }}
+            />
+          </div>
+          <Button size='small' variant="contained" sx={{ textTransform: "capitalize", textAlign: "center" }}> <AddIcon />  Add Enquiry </Button>
+        </Box>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default _Enquiry;
+export default RenderEnquiry;
+

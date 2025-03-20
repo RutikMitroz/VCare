@@ -8,9 +8,11 @@ import App from "./App";
 import {store} from "./redux/store/store";
 import ScrollToTop from "./components/utilities/ScrollToTop";
 import theme from "./utils/theme";
+import ViewMeasurerProvider from "./context/ViewMeasurerContext";
 
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
+
 
 const queryClient = new QueryClient();
 
@@ -21,17 +23,23 @@ root.render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        {/* <ViewMeasurerProvider> */}
+
+        <ViewMeasurerProvider>
+
         {/* <AuthContext> */}
         <Toaster toastOptions={{ duration: 3000, style: { fontSize: "16px" } }} />
         {/* <ModalContext> */}
         <App />
         {/* </ModalContext> */}
         {/* </AuthContext> */}
-        {/* </ViewMeasurerProvider> */}
+
+        </ViewMeasurerProvider>
+
       </QueryClientProvider>
       </ThemeProvider>
     </Provider>
   </BrowserRouter>,
   // </React.StrictMode>
+
 );
+

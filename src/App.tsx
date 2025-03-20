@@ -4,6 +4,7 @@ import ErrorBoundary from "./components/utilities/ReactErrorBoundary";
 import Enquiry from "./pages/Enquiry";
 import './index.css';
 
+
 function App() {
   window.addEventListener("vite:preloadError", () => {
     window.location.reload();
