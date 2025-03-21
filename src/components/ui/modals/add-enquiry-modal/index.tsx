@@ -1,6 +1,6 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { Modal, Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Grid, Button, } from "@mui/material";
+import { Modal, Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Grid, Button } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -38,7 +38,6 @@ const validationSchema = Yup.object({
 });
 
 const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
-    // Initial form values
     const initialValues: Enquiry = {
         clientName: "",
         companyName: "",
@@ -53,7 +52,6 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
     };
 
     const handleSubmit = (values: Enquiry) => {
-        // onSave(values);
         console.log(values);
         onClose();
     };
@@ -66,7 +64,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    width: 600,
+                    width: 900,
                     bgcolor: "background.paper",
                     boxShadow: 24,
                     borderRadius: "12px",
@@ -77,31 +75,38 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                     <Typography variant="h6" sx={{ fontWeight: "bold", color: "#424242" }}>
                         Add Enquiry
                     </Typography>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DatePicker
+                            value={new Date()}
+                            disabled
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{
+                                        width: "10px",
+                                        "& .MuiInputBase-input": {
+                                            padding: "6px 8px",
+                                            fontSize: "0.875rem",
+                                        },
+                                    }}
+                                    inputProps={{ ...params.inputProps, readOnly: true }}
+                                />
+                            )}
+                            format="dd/MM/yyyy"
+                        />
+                    </LocalizationProvider>
                 </Box>
+                <Box sx={{ borderBottom: "1px solid #E0E0E0", mb: 3 }} />
+
                 <Formik
                     initialValues={initialValues}
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
                 >
-                    {({ values, setFieldValue, errors, touched }) => (
+                    {({ errors, touched }) => (
                         <Form>
-                            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                    <DatePicker
-                                        value={values.enquiryDate}
-                                        onChange={(date) => setFieldValue("enquiryDate", date)}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                size="small"
-                                                sx={{ width: "150px" }}
-                                                error={touched.enquiryDate && !!errors.enquiryDate}
-                                                helperText={touched.enquiryDate && errors.enquiryDate}
-                                            />
-                                        )}
-                                    />
-                                </LocalizationProvider>
-                            </Box>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={4}>
                                     <Field
@@ -231,12 +236,14 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                     />
                                 </Grid>
                             </Grid>
-                            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3, gap: 2 }}>
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 4 }}>
                                 <Button
                                     type="submit"
                                     variant="contained"
                                     sx={{
                                         backgroundColor: "#00695C",
+                                        paddingX: 12,
+                                        fontWeight: "bold",
                                         color: "#FFFFFF",
                                         textTransform: "none",
                                         "&:hover": {
@@ -250,8 +257,10 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                     variant="contained"
                                     onClick={onClose}
                                     sx={{
-                                        backgroundColor: "#B0BEC5",
-                                        color: "#FFFFFF",
+                                        backgroundColor: "#D2D2D2",
+                                        paddingX: 12,
+                                        fontWeight: "bold",
+                                        color: "black",
                                         textTransform: "none",
                                         "&:hover": {
                                             backgroundColor: "#90A4AE",
