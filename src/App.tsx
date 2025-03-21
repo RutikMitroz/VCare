@@ -6,11 +6,14 @@ import './index.css';
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Reports from "./pages/Reports";
-import Orders from "./pages/Orders";
 import Complaints from "./pages/Complaints";
 import Inventory from "./pages/Inventory";
 import Payments from "./pages/Payments";
 import OrderDetail from "./pages/OrderDetail";
+import Order from "./pages/Order";
+import EnquiryDetails from "./pages/EnquiryDetails";
+
+
 function App() {
   window.addEventListener("vite:preloadError", () => {
     window.location.reload();
@@ -27,12 +30,13 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/enquiry" element={<Enquiry />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/users" element={<Users />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/enquiry/:id" element={<EnquiryDetails />} />
+            <Route path="/orders" element={<Order />} />
           </Routes>
         )}
       </ErrorBoundary>

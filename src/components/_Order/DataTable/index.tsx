@@ -1,5 +1,8 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Link, Chip, } from "@mui/material";
+import {
+    Table, TableCell, TableContainer, TableHead, TablePagination, TableRow,
+    Box, TableBody, Link, Chip,
+} from "@mui/material";
 import CustomMenuList from "../../utilities/CustomMenuList";
 
 interface Enquiry {
@@ -50,8 +53,8 @@ const DataTable = ({
     const headerCellStyle = {
         backgroundColor: "#1D434C",
         color: "#FFFFFF",
+        // fontWeight: "bold",
         fontSize: "14px",
-        textTransform: "capitalize",
         borderBottom: "1px solid #E0E0E0",
         padding: "12px",
         position: "sticky",
@@ -81,22 +84,25 @@ const DataTable = ({
                                         borderTopLeftRadius: "12px",
                                     }}
                                 >
-                                    Enquiry ID
+                                    Order ID
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Date
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Client Name
+                                    Customer Name
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Phone
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Assigned To
+                                    Products
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Enquiry For
+                                    Total Amount
+                                </TableCell>
+                                <TableCell align="center" sx={headerCellStyle}>
+                                    Assigned Technician
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Status

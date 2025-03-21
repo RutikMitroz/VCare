@@ -24,6 +24,7 @@ const Navbar = () => {
     return currentItem ? currentItem.text : 'Dashboard';
   };
 
+
   return (
     <AppBar 
       position="sticky" 
