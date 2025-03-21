@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   AppBar,
   Toolbar,
@@ -7,9 +7,24 @@ import {
   IconButton,
 } from '@mui/material';
 import { menuItems } from '../../../constants/menuItems.tsx';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
-  const [selectedItem, setSelectedItem] = useState('Enquiry'); 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Find the menu item that matches the current path
+  const getCurrentMenuItem = () => {
+    const currentPath = location.pathname;
+    // Handle root path
+    if (currentPath === '/') {
+      return 'Dashboard';
+    }
+    const currentItem = menuItems.find(item => item.path === currentPath);
+    return currentItem ? currentItem.text : 'Dashboard';
+  };
+
+
   return (
     <AppBar 
       position="sticky" 
@@ -28,7 +43,7 @@ const Navbar = () => {
         {menuItems.map((item, index) => (
           <Box
             key={index}
-            onClick={() => setSelectedItem(item.text)}
+            onClick={() => navigate(item.path)}
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -36,10 +51,10 @@ const Navbar = () => {
               cursor: 'pointer',
               padding: '6px 12px',
               borderRadius: '24px',
-              backgroundColor: selectedItem === item.text ? '#0A2732' : 'transparent',
+              backgroundColor: getCurrentMenuItem() === item.text ? '#0A2732' : 'transparent',
               transition: 'all 0.3s ease',
               '&:hover': {
-                backgroundColor: selectedItem === item.text ? '#0A2732' : 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: getCurrentMenuItem() === item.text ? '#0A2732' : 'rgba(255, 255, 255, 0.1)',
               },
             }}
           >
@@ -47,7 +62,7 @@ const Navbar = () => {
               color="inherit" 
               size="small"
               sx={{ 
-                color: selectedItem === item.text ? '#60CA72' : 'inherit',
+                color: getCurrentMenuItem() === item.text ? '#60CA72' : 'inherit',
                 padding: '2px',
                 '& .MuiSvgIcon-root': {
                   fontSize: '16px',
@@ -62,8 +77,8 @@ const Navbar = () => {
                 ml: 0.5,
                 whiteSpace: 'nowrap',
                 fontSize: '13px',
-                opacity: selectedItem === item.text ? 1 : 0.85,
-                color: selectedItem === item.text ? '#60CA72' : 'inherit',
+                opacity: getCurrentMenuItem() === item.text ? 1 : 0.85,
+                color: getCurrentMenuItem() === item.text ? '#60CA72' : 'inherit',
               }}
             >
               {item.text}
