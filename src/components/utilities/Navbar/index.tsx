@@ -9,8 +9,7 @@ import {
 import { menuItems } from '../../../constants/menuItems.tsx';
 
 const Navbar = () => {
-  const [selectedItem, setSelectedItem] = useState('Enquiry'); // Default selected item
-
+  const [selectedItem, setSelectedItem] = useState('Enquiry'); 
   return (
     <AppBar 
       position="sticky" 

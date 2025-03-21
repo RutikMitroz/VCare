@@ -3,6 +3,8 @@ import FullPageInfo from "./components/utilities/FullPageInfo";
 import ErrorBoundary from "./components/utilities/ReactErrorBoundary";
 import Enquiry from "./pages/Enquiry";
 import './index.css';
+import Order from "./pages/Order";
+import EnquiryDetails from "./pages/EnquiryDetails";
 
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
         ) : (
           <Routes>
             <Route path="/enquiry" element={<Enquiry />} />
+            <Route path="/enquiry/:id" element={<EnquiryDetails />} />
+            <Route path="/order" element={<Order />} />
           </Routes>
         )}
       </ErrorBoundary>

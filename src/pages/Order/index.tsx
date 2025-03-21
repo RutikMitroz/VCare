@@ -3,17 +3,17 @@ import Layout from "../../components/Layout";
 import LazyLoadingWrapper from "../../components/utilities/LazyLoadingWrapper";
 import { lazy } from "react";
 
-const RenderEnquiry = lazy(() => import("../../components/_Enquiry"));
-const Enquiry = () => {
+const RenderOrder = lazy(() => import("../../components/_Order"));
+const Order = () => {
   return (
     <>
       <Helmet>
-        <title>VCare Admin | Enquiry</title>
+        <title>VCare Admin | Order</title>
       </Helmet>
 
       <Layout>
         <LazyLoadingWrapper rootStyles={{ minHeight: "calc(100vh - 8rem)" }}>
-          <RenderEnquiry />
+          <RenderOrder />
         </LazyLoadingWrapper>
       </Layout>
 
@@ -21,4 +21,4 @@ const Enquiry = () => {
   )
 };
 
-export default Enquiry;
+export default Order;

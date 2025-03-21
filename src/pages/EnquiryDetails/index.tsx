@@ -3,8 +3,8 @@ import Layout from "../../components/Layout";
 import LazyLoadingWrapper from "../../components/utilities/LazyLoadingWrapper";
 import { lazy } from "react";
 
-const RenderEnquiry = lazy(() => import("../../components/_Enquiry"));
-const Enquiry = () => {
+const RenderEnquiryDetails = lazy(() => import("../../components/_EnquiryDetails"));
+const EnquiryDetails = () => {
   return (
     <>
       <Helmet>
@@ -13,7 +13,7 @@ const Enquiry = () => {
 
       <Layout>
         <LazyLoadingWrapper rootStyles={{ minHeight: "calc(100vh - 8rem)" }}>
-          <RenderEnquiry />
+          <RenderEnquiryDetails />
         </LazyLoadingWrapper>
       </Layout>
 
@@ -21,4 +21,4 @@ const Enquiry = () => {
   )
 };
 
-export default Enquiry;
+export default EnquiryDetails;

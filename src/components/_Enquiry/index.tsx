@@ -1,53 +1,27 @@
-import React, { useState } from "react";
-import Sidebar from "./Sidebar";
-
-import { Box, Button, FormControl, Select, MenuItem, SelectChangeEvent } from "@mui/material";
-
+import Sidebar from "../ui/Sidebar";
+import { Box, Button } from "@mui/material";
 
 import AddIcon from '@mui/icons-material/Add';
 import { TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import DataTable from "./DataTable";
-
-// import { InputField } from "@medlivery/vulkan-ui";
+import { useState } from "react";
+import AddEnquiryModal from "../ui/modals/add-enquiry-modal";
 
 const RenderEnquiry = () => {
-  const [timeFilter, setTimeFilter] = useState('This Month');
 
-  const handleTimeFilterChange = (event: SelectChangeEvent) => {
-    setTimeFilter(event.target.value);
-  };
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" }}>
-      <Box sx={{width: "25%",backgroundColor:"white",borderRadius:"16px",padding:"16px",border:"2px solid #E0E0E0"}}>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <Select
-            value={timeFilter}
-            onChange={handleTimeFilterChange}
-            sx={{
-              backgroundColor: 'white',
-              '.MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(0, 0, 0, 0.1)',
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(0, 0, 0, 0.2)',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(0, 0, 0, 0.2)',
-              },
-              fontSize: '14px',
-              color: '#333',
-            }}
-          >
-            <MenuItem value="This Week">This Week</MenuItem>
-            <MenuItem value="This Month">This Month</MenuItem>
-            <MenuItem value="This Year">This Year</MenuItem>
-          </Select>
-        </FormControl>
+      <Box sx={{ width: "25%", backgroundColor: "white", borderRadius: "16px", padding: "16px", border: "2px solid #E0E0E0" }}>
+
         <Sidebar />
       </Box>
-      <Box sx={{width: "75%"}}>
+      <Box sx={{ width: "75%" }}>
         <Box
           sx={{
             margin: '0.5rem 0 1rem 0',
@@ -95,6 +69,7 @@ const RenderEnquiry = () => {
           />
           <Button
             variant="contained"
+            onClick={handleOpen}
             size="small"
             startIcon={<AddIcon sx={{ fontSize: '16px' }} />}
             sx={{
@@ -124,6 +99,7 @@ const RenderEnquiry = () => {
           handleChangeRowsPerPage={() => { }}
         />
       </Box>
+      <AddEnquiryModal open={open} onClose={handleClose} />
     </Box>
   );
 };
