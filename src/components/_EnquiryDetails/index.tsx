@@ -1,11 +1,28 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import ClientDetailsCard from "../ui/Cards/ClientDetailsCard";
 import EnquiryDetailsCard from "../ui/Cards/EnquiryDetailsCard";
 import ActivityCard from "../ui/Cards/ActivityCard";
 import ProgressBar from "../ui/ProgressBar";
-import DataTable from "./DataTable";
+import Quotation from "./Quotatiion";
+import Order from "./Order";
+import { useAppSelector } from "../../redux/store";
+import Challan from "./Challan";
+import Invoice from "./Invoice";
 
 const RenderEnquiryDetails = () => {
+    const activeStep = useAppSelector((state) => state.progressBar.activeStep);
+
+    const stepComponents = [
+        <Quotation key="quotation" />,
+        <Order key="order" />,
+        <Challan key="challan" />,
+        <Invoice key="invoice" />,
+    ];
+
+    const currentComponent =
+        activeStep >= 0 && activeStep < stepComponents.length
+            ? stepComponents[activeStep]
+            : <div>Unknown Step</div>;
 
     return (
         <Box sx={{ width: "100%", display: "flex", gap: 2 }}>
@@ -15,35 +32,7 @@ const RenderEnquiryDetails = () => {
             </Box>
             <Box sx={{ width: "60%", display: "flex", flexDirection: "column", gap: 2 }}>
                 <ProgressBar />
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                    }}
-                >
-                    <Typography sx={{ fontSize: 18, fontWeight: "bold" }} >Quotations</Typography>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            backgroundColor: '#1D434C',
-                            color: '#FFFFFF',
-                            borderRadius: '8px',
-                            padding: '16px 22px',
-                            textTransform: 'capitalize',
-                            fontWeight: 'bold',
-                            fontSize: '14px',
-                            height: '2.5rem',
-                            '&:hover': {
-                                backgroundColor: '#004D40',
-                            },
-                        }}
-                    >
-                        Create Quotation
-
-                    </Button>
-                </Box>
-                <DataTable />
+                {currentComponent}
             </Box>
             <Box sx={{ width: "20%" }}>
                 <ActivityCard />

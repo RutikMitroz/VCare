@@ -1,47 +1,38 @@
-import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, IconButton, } from "@mui/material";
+import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, IconButton, Typography, Button, } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
+import { useAppDispatch } from "../../../../redux/store";
+import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
 
-interface Quotation {
-    id: string;
-    quotationDate: string;
-    enquiryDate: string;
-    amount: string;
-    dimensions: string;
+interface challan {
+    challanId: string;
+    createDate: string;
+    assignedTo: string;
+    products: string;
 }
 
-const DataTable = () => {
-    // const menuDataRef = React.useRef<Quotation | null>(null);
-    // const [openMenu, setOpenMenu] = React.useState(false);
-    // const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(null);
+interface DataTableProps {
+    setFlag: (isCreating: boolean) => void;
+}
 
-    const quotations: Quotation[] = [
+const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
+
+    const dispatch = useAppDispatch();
+    const challans: challan[] = [
         {
-            id: "25/02/QT00018",
-            quotationDate: "26 Jan 2025",
-            enquiryDate: "25 Jan 2025",
-            amount: "₹27,000",
-            dimensions: "20 * 20",
+            challanId: "25/02/QT00018",
+            createDate: "34rty123456",
+            assignedTo: "Amit Kumar",
+            products: "Hikvision 5MP CCTV Camera",
         },
         {
-            id: "25/02/QT00017",
-            quotationDate: "25 Jan 2025",
-            enquiryDate: "25 Jan 2025",
-            amount: "₹36,000",
-            dimensions: "20 * 20",
+            challanId: "25/02/QT00019",
+            createDate: "34rty123456",
+            assignedTo: "Amit Kumar",
+            products: "Hikvision 5MP CCTV Camera",
         },
     ];
-
-    // const handleViewDetailsClick = (
-    //     event: React.MouseEvent<HTMLElement>,
-    //     row: Quotation
-    // ) => {
-    //     menuDataRef.current = row;
-    //     setMenuAnchorEl(event.currentTarget);
-    //     setOpenMenu(true);
-    // };
 
     const headerCellStyle = {
         backgroundColor: "#1D434C",
@@ -57,6 +48,35 @@ const DataTable = () => {
 
     return (
         <>
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
+                <Typography sx={{ fontSize: 18, fontWeight: "bold" }} >Challan</Typography>
+                <Button
+                    onClick={() => setFlag(false)}
+                    variant="contained"
+                    sx={{
+                        backgroundColor: '#1D434C',
+                        color: '#FFFFFF',
+                        borderRadius: '8px',
+                        padding: '16px 22px',
+                        textTransform: 'capitalize',
+                        fontWeight: 'bold',
+                        fontSize: '14px',
+                        height: '2.5rem',
+                        '&:hover': {
+                            backgroundColor: '#004D40',
+                        },
+                    }}
+                >
+                    Create Challan
+
+                </Button>
+            </Box>
             <Box
                 className="border border-border border-solid rounded-md overflow-hidden"
                 sx={{ overflowX: "auto", width: "100%" }}
@@ -77,16 +97,16 @@ const DataTable = () => {
                                         borderTopLeftRadius: "12px",
                                     }}
                                 >
-                                    Quotation ID
+                                    Challan Id
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Quotation Date
+                                    Create Date
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Enquiry Date
+                                    Assigned To
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Amount
+                                    Products
                                 </TableCell>
                                 <TableCell
                                     align="center"
@@ -100,10 +120,10 @@ const DataTable = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {quotations.length > 0 ? (
-                                quotations.map((row, index) => (
+                            {challans.length > 0 ? (
+                                challans.map((row, index) => (
                                     <TableRow
-                                        key={row.id}
+                                        key={row.challanId}
                                         sx={{
                                             backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
                                             "&:hover": {
@@ -117,10 +137,10 @@ const DataTable = () => {
                                             },
                                         }}
                                     >
-                                        <TableCell align="center">{row.id}</TableCell>
-                                        <TableCell align="center">{row.quotationDate}</TableCell>
-                                        <TableCell align="center">{row.enquiryDate}</TableCell>
-                                        <TableCell align="center">{row.amount}</TableCell>
+                                        <TableCell align="center">{row.challanId}</TableCell>
+                                        <TableCell align="center">{row.createDate}</TableCell>
+                                        <TableCell align="center">{row.assignedTo}</TableCell>
+                                        <TableCell align="center">{row.products}</TableCell>
                                         <TableCell align="center">
                                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
                                                 <IconButton
@@ -140,7 +160,6 @@ const DataTable = () => {
                                                             color: "#00695C",
                                                         },
                                                     }}
-                                                    // onClick={(event) => handleViewDetailsClick(event, row)}
                                                 >
                                                     <VisibilityIcon sx={{ color: "#4398D3" }} fontSize="small" />
                                                 </IconButton>
@@ -168,6 +187,28 @@ const DataTable = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <Box sx={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+                    <Button
+                        variant="contained"
+                        onClick={() => dispatch(moveToNextStep())}
+                        sx={{
+                            backgroundColor: '#1D434C',
+                            color: '#FFFFFF',
+                            borderRadius: '8px',
+                            padding: '16px 24px',
+                            textTransform: 'capitalize',
+                            fontWeight: 'bold',
+                            fontSize: '16px',
+                            height: '3.5rem',
+                            '&:hover': {
+                                backgroundColor: '#004D40',
+                            },
+                        }}
+                    >
+                        Create Invoice
+
+                    </Button>
+                </Box>
             </Box>
         </>
     );
