@@ -1,4 +1,6 @@
 import { Box, Button, Card, Chip, Typography } from "@mui/material";
+import { useState } from "react";
+import AddUpdateModal from "../../modals/add-update-modal";
 
 interface Activity {
     by: string;
@@ -8,6 +10,11 @@ interface Activity {
 }
 
 const ActivityCard = () => {
+
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const activities: Activity[] = [
         {
@@ -65,6 +72,7 @@ const ActivityCard = () => {
                 </Typography>
                 <Button
                     variant="contained"
+                    onClick={handleOpen}
                     sx={{
                         backgroundColor: "#1D434C",
                         color: "#FFFFFF",
@@ -135,6 +143,7 @@ const ActivityCard = () => {
                     </Box>
                 ))}
             </Box>
+            <AddUpdateModal open={open} onClose={handleClose} />
         </Card>
     );
 };

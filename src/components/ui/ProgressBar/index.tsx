@@ -1,8 +1,9 @@
 import {
-    Stepper, Step, StepLabel, StepConnector, stepConnectorClasses, Box, Button,
+    Stepper, Step, StepLabel, StepConnector, stepConnectorClasses,
+    Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 
 const CustomConnector = styled(StepConnector)(() => ({
     [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -56,22 +57,9 @@ const CustomStepIcon = (props: { active: boolean; completed: boolean }) => {
 
 const ProgressBar = () => {
     const steps = ["Quotations", "Order", "Challan", "Invoice"];
-    const [activeStep, setActiveStep] = useState(0);
-    const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-
-    const handleNext = () => {
-        if (activeStep < steps.length - 1) {
-            setCompletedSteps([...completedSteps, activeStep]);
-            setActiveStep((prev) => prev + 1);
-        }
-    };
-
-    const handleBack = () => {
-        if (activeStep > 0) {
-            setCompletedSteps(completedSteps.filter((step) => step !== activeStep - 1));
-            setActiveStep((prev) => prev - 1);
-        }
-    };
+    const activeStep = useAppSelector((state) => state.progressBar.activeStep);
+    const completedSteps = useAppSelector((state) => state.progressBar.completedSteps);
+    const dispatch = useAppDispatch();
 
     return (
         <Box sx={{ width: "100%", backgroundColor: "white", borderRadius: "16px", border: "1px solid black" }}>
@@ -107,38 +95,7 @@ const ProgressBar = () => {
                     </Step>
                 ))}
             </Stepper>
-            {/* <Box sx={{ display: "flex", justifyContent: "center", marginTop: "16px", gap: "16px" }}>
-                <Button
-                    variant="contained"
-                    onClick={handleBack}
-                    disabled={activeStep === 0}
-                    sx={{
-                        backgroundColor: "#00695C",
-                        color: "#FFFFFF",
-                        textTransform: "none",
-                        "&:hover": {
-                            backgroundColor: "#004D40",
-                        },
-                    }}
-                >
-                    Back
-                </Button>
-                <Button
-                    variant="contained"
-                    onClick={handleNext}
-                    disabled={activeStep === steps.length - 1}
-                    sx={{
-                        backgroundColor: "#00695C",
-                        color: "#FFFFFF",
-                        textTransform: "none",
-                        "&:hover": {
-                            backgroundColor: "#004D40",
-                        },
-                    }}
-                >
-                    Next
-                </Button>
-            </Box> */}
+            {/* Removed Back and Next buttons since progress will be controlled by actions */}
         </Box>
     );
 };
