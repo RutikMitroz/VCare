@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import EnquiryDataCard from '../Cards/EnquiryDataCard'
-import { Box, FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material'
-function Sidebar() {
+import { Box, FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+
+interface SidebarProps {
+  summary: any;
+}
+
+function Sidebar({ summary }: SidebarProps) {
   const [timeFilter, setTimeFilter] = useState('This Month');
 
   const handleTimeFilterChange = (event: SelectChangeEvent) => {
@@ -33,10 +38,10 @@ function Sidebar() {
           <MenuItem value="This Year">This Year</MenuItem>
         </Select>
       </FormControl>
-      <EnquiryDataCard text="Total Enquiries" quantity={351} color="#459CFF" />
-      <EnquiryDataCard text="Quotation Sent" quantity={261} color="#60CA72" />
-      <EnquiryDataCard text="Not Contacted" quantity={90} color="#FF0000" />
-      <EnquiryDataCard text="Reminder" quantity={18} color="#1F1F1F" />
+      <EnquiryDataCard text="Total Enquiries" quantity={summary?.totalEnquiries} color="#459CFF" />
+      <EnquiryDataCard text="Quotation Sent" quantity={summary?.quotation_sent} color="#60CA72" />
+      <EnquiryDataCard text="Not Contacted" quantity={summary?.not_contacted} color="#FF0000" />
+      <EnquiryDataCard text="Reminder" quantity={summary?.remainder} color="#1F1F1F" />
     </Box>
   )
 }
