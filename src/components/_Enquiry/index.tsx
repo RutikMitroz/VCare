@@ -5,21 +5,35 @@ import AddIcon from '@mui/icons-material/Add';
 import { TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import DataTable from "./DataTable";
-import { useState } from "react";
+import { ChangeEvent, MouseEvent, useState } from "react";
 import AddEnquiryModal from "../ui/modals/add-enquiry-modal";
+import { useGetEnquiries } from "../../hooks/enquiry/useGetAllEnquiries";
+import MessageBox from "../utilities/MessageBox";
+import Spinner from "../utilities/Spinner";
 
 const RenderEnquiry = () => {
 
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState<number>(1);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+
+  const handleChangePage = (event: MouseEvent<HTMLButtonElement> | null, newPage: number) => setPage(newPage + 1);
+
+  const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(1);
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const { data, isFetching, isError } = useGetEnquiries({ page, limit: rowsPerPage });
 
   return (
     <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" }}>
       <Box sx={{ width: "25%", backgroundColor: "white", borderRadius: "16px", padding: "16px", border: "2px solid #E0E0E0" }}>
 
-        <Sidebar />
+        <Sidebar summary={data?.summary} />
       </Box>
       <Box sx={{ width: "75%" }}>
         <Box
@@ -90,14 +104,18 @@ const RenderEnquiry = () => {
 
           </Button>
         </Box>
-        <DataTable
-          appointments={[]}
-          page={1}
-          rowsPerPage={10}
-          totalNoOfDocs={10}
-          handleChangePage={() => { }}
-          handleChangeRowsPerPage={() => { }}
-        />
+        {isError ? <MessageBox message="Something went wrong" />
+          : isFetching ? <Spinner />
+            : data?.data?.length === 0 ? <MessageBox message="No Enquiries Found" /> :
+              <DataTable
+                enquiries={data?.data}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                totalNoOfDocs={data?.summary?.totalEnquiries}
+                handleChangePage={handleChangePage}
+                handleChangeRowsPerPage={handleChangeRowsPerPage}
+              />
+        }
       </Box>
       <AddEnquiryModal open={open} onClose={handleClose} />
     </Box>

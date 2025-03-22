@@ -2,7 +2,12 @@ import { Card, Typography, Box, Link, } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
-const ClientDetailsCard = () => {
+interface ClientDetailsCardProps {
+    clientDetails: any;
+}
+
+const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
+    console.log("clientDetails", clientDetails);
     return (
         <Card
             sx={{
@@ -60,7 +65,7 @@ const ClientDetailsCard = () => {
                             color: "#00695C",
                         }}
                     >
-                        Sarah Johnson
+                        {clientDetails?.client_name}
                     </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -80,7 +85,7 @@ const ClientDetailsCard = () => {
                             color: "#00695C",
                         }}
                     >
-                        +91 98989885258
+                        {clientDetails?.client_phone}
                     </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -100,7 +105,7 @@ const ClientDetailsCard = () => {
                             color: "#00695C",
                         }}
                     >
-                        sarahjohnsan@gmail.com
+                        {clientDetails?.client_email}
                     </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "flex-start" }}>
@@ -121,11 +126,7 @@ const ClientDetailsCard = () => {
                             lineHeight: "1.5",
                         }}
                     >
-                        101, Business Plaza, Andheri East
-                        <br />
-                        Mumbai, Maharashtra - 400059
-                        <br />
-                        India
+                        {clientDetails?.client_address}
                     </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -145,11 +146,11 @@ const ClientDetailsCard = () => {
                             color: "#00695C",
                             textDecoration: "underline",
                             "&:hover": {
-                                color: "#004D40", // Darker teal on hover
+                                color: "#004D40", 
                             },
-                            wordBreak: "break-all", // Break long words/URLs to wrap to the next line
-                            overflowWrap: "break-word", // Ensure wrapping for long text
-                            maxWidth: "calc(100% - 26px)", // Adjust width to account for the icon (18px icon + 8px margin)
+                            wordBreak: "break-all", 
+                            overflowWrap: "break-word", 
+                            maxWidth: "calc(100% - 26px)", 
                         }}
                     >
                         https://maps.app.goo.gl/Da1D0mX8Tn45mWs6

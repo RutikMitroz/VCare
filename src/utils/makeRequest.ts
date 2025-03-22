@@ -26,7 +26,6 @@ interface MakeRequestParams {
   abortController?: AbortController;
   abortControllerSignal?: AbortSignal;
 }
-
 interface ApiResponse<T> {
   status: string;
   code: number;
@@ -101,7 +100,9 @@ export const makeRequest =
         } else if (response.data.status === "warning" && show_error_message) {
           showToast(error_message ?? response.data.message, "error");
         } else {
-          show_fallback && showToast(response.data.message, "error");
+          if (show_fallback) {
+            showToast(response.data.message, "error");
+          }
         }
       }
 
@@ -118,7 +119,7 @@ export const makeRequest =
         throw { status: "error", code: 400, message: errorMessage };
       }
 
-      showMessage &&
+      if (showMessage)
         showToast(error_message ?? "Something went wrong", "error");
 
       // Do not throw error when request is cancelled

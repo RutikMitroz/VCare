@@ -35,7 +35,7 @@ function App() {
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/users" element={<Users />} />
             <Route path="/payments" element={<Payments />} />
-            <Route path="/enquiry/:id" element={<EnquiryDetails />} />
+            <Route path="/enquiry/:enquiryId" element={<EnquiryDetails />} />
             <Route path="/orders" element={<Order />} />
           </Routes>
         )}

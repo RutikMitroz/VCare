@@ -8,8 +8,15 @@ import Order from "./Order";
 import { useAppSelector } from "../../redux/store";
 import Challan from "./Challan";
 import Invoice from "./Invoice";
+import { useGetEnquiryById } from "../../hooks/enquiry/useGetEnquiryById";
+import { useParams } from "react-router-dom";
 
 const RenderEnquiryDetails = () => {
+
+    const { enquiryId } = useParams<{ enquiryId: string }>();
+
+    const { data } = useGetEnquiryById(enquiryId || "");
+
     const activeStep = useAppSelector((state) => state.progressBar.activeStep);
 
     const stepComponents = [
@@ -24,10 +31,11 @@ const RenderEnquiryDetails = () => {
             ? stepComponents[activeStep]
             : <div>Unknown Step</div>;
 
+
     return (
         <Box sx={{ width: "100%", display: "flex", gap: 2 }}>
             <Box sx={{ width: "20%", display: "flex", flexDirection: "column", gap: 2 }}>
-                <ClientDetailsCard />
+                <ClientDetailsCard clientDetails={data?.data?.client_id} />
                 <EnquiryDetailsCard />
             </Box>
             <Box sx={{ width: "60%", display: "flex", flexDirection: "column", gap: 2 }}>

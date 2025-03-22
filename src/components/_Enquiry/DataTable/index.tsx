@@ -1,19 +1,12 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Link, Chip, } from "@mui/material";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, } from "@mui/material";
 import CustomMenuList from "../../utilities/CustomMenuList";
-
-interface Enquiry {
-    id: string;
-    date: string;
-    clientName: string;
-    phone: string;
-    assignedTo: string;
-    enquiryFor: string;
-    status: string;
-}
+import convertDateToString from "../../../utils/convertDateToString";
+import { displayShortId } from "../../../utils/displayShortId";
+import { useNavigate } from "react-router-dom";
 
 interface DataTableProps {
-    appointments: Enquiry[];
+    enquiries: any[];
     page: number;
     rowsPerPage: number;
     totalNoOfDocs: number;
@@ -25,27 +18,20 @@ interface DataTableProps {
 }
 
 const DataTable = ({
-    appointments,
+    enquiries,
     page,
     rowsPerPage,
     totalNoOfDocs,
     handleChangePage,
     handleChangeRowsPerPage,
 }: DataTableProps) => {
-    const menuDataRef = React.useRef<Enquiry | null>(null);
+    const menuDataRef = React.useRef<any | null>(null);
     const [openMenu, setOpenMenu] = React.useState(false);
     const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
         null
     );
 
-    const handleViewDetailsClick = (
-        event: React.MouseEvent<HTMLElement>,
-        row: Enquiry
-    ) => {
-        menuDataRef.current = row;
-        setMenuAnchorEl(event.currentTarget);
-        setOpenMenu(true);
-    };
+    const navigate = useNavigate();
 
     const headerCellStyle = {
         backgroundColor: "#1D434C",
@@ -98,87 +84,58 @@ const DataTable = ({
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Enquiry For
                                 </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
+                                <TableCell align="center" sx={{
+                                    ...headerCellStyle,
+                                    borderTopRightRadius: "12px",
+                                }}>
                                     Status
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{
-                                        ...headerCellStyle,
-                                        borderTopRightRadius: "12px",
-                                    }}
-                                >
-                                    Action
                                 </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {appointments.length > 0 ? (
-                                appointments
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    .map((row, index) => (
-                                        <TableRow
-                                            key={row.id}
+                            {enquiries.map((enquiry, index) => (
+                                <TableRow
+                                    onClick={() => navigate(`/enquiry/${enquiry._id}`)}
+                                    key={enquiry._id}
+                                    sx={{
+                                        cursor: "pointer",
+                                        backgroundColor:
+                                            index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
+                                        "&:hover": {
+                                            backgroundColor: "#E8F0FE",
+                                        },
+                                        "& .MuiTableCell-root": {
+                                            fontSize: "14px",
+                                            color: "#424242",
+                                            borderBottom: "1px solid #E0E0E0",
+                                            padding: "12px",
+                                        },
+                                    }}
+                                >
+                                    <TableCell align="center">{displayShortId(enquiry._id)}</TableCell>
+                                    <TableCell align="center">{convertDateToString(enquiry?.date)}</TableCell>
+                                    <TableCell align="center">{enquiry.client_id.client_name}</TableCell>
+                                    <TableCell align="center">{enquiry.client_id.client_phone}</TableCell>
+                                    <TableCell align="center">{enquiry.assign_to}</TableCell>
+                                    <TableCell align="center">{enquiry.enquiry_for}</TableCell>
+                                    <TableCell align="center">
+                                        <Chip
+                                            label={enquiry.status}
                                             sx={{
                                                 backgroundColor:
-                                                    index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
-                                                "&:hover": {
-                                                    backgroundColor: "#E8F0FE",
-                                                },
-                                                "& .MuiTableCell-root": {
-                                                    fontSize: "14px",
-                                                    color: "#424242",
-                                                    borderBottom: "1px solid #E0E0E0",
-                                                    padding: "12px",
-                                                },
+                                                    enquiry.status === "QUOTATION SENT"
+                                                        ? "#4CAF50"
+                                                        : "#F44336",
+                                                color: "#FFFFFF",
+                                                fontWeight: "bold",
+                                                fontSize: "12px",
+                                                height: "24px",
                                             }}
-                                        >
-                                            <TableCell align="center">{row.id}</TableCell>
-                                            <TableCell align="center">{row.date}</TableCell>
-                                            <TableCell align="center">{row.clientName}</TableCell>
-                                            <TableCell align="center">{row.phone}</TableCell>
-                                            <TableCell align="center">{row.assignedTo}</TableCell>
-                                            <TableCell align="center">{row.enquiryFor}</TableCell>
-                                            <TableCell align="center">
-                                                <Chip
-                                                    label={row.status}
-                                                    sx={{
-                                                        backgroundColor:
-                                                            row.status === "QUOTATION SENT"
-                                                                ? "#4CAF50"
-                                                                : "#F44336",
-                                                        color: "#FFFFFF",
-                                                        fontWeight: "bold",
-                                                        fontSize: "12px",
-                                                        height: "24px",
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell align="center">
-                                                <Link
-                                                    component="button"
-                                                    underline="hover"
-                                                    sx={{
-                                                        color: "#00695C",
-                                                        fontWeight: "bold",
-                                                        fontSize: "14px",
-                                                    }}
-                                                    onClick={(event) =>
-                                                        handleViewDetailsClick(event, row)
-                                                    }
-                                                >
-                                                    View Details
-                                                </Link>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={8} align="center">
-                                        No data available
+                                        />
                                     </TableCell>
                                 </TableRow>
-                            )}
+                            ))
+                            }
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -209,7 +166,7 @@ const DataTable = ({
                         {
                             title: "More details",
                             iconImage: "/assets/icons/more_details.png",
-                            // fn: () => navigate(`/appointments/${menuDataRef.current?._id ?? ""}`),
+                            // fn: () => navigate(`/enquiries/${menuDataRef.current?._id ?? ""}`),
                         },
                     ]}
                 />
