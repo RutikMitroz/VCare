@@ -208,7 +208,7 @@ const RenderProduct = () => {
                   width: "120px",
                   fontSize: "14px",
                   "&:hover": {
-                    bgcolor: "#1D434C",
+                    bgcolor: Colors.primary,
                   },
                 }}
               >

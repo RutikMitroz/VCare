@@ -2,6 +2,7 @@ import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, 
 import OrderIdAndDateCard from "../../../ui/Cards/OrderIdAndDateCard";
 import { useAppDispatch } from "../../../../redux/store";
 import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
+import { Colors } from "../../../../constants/Colors";
 
 interface Quotation {
     id: string;
@@ -35,7 +36,7 @@ const DataTable = () => {
     ];
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",

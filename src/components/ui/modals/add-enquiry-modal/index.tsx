@@ -1,9 +1,20 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { Modal, Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Grid, Button } from "@mui/material";
+import {
+    Modal, Box, Typography, TextField, Select, MenuItem,
+    FormControl, InputLabel, Grid, Button,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useGetClients } from "../../../../hooks/enquiry/useGetAllClients";
+import { Colors } from "../../../../constants/Colors";
+import { useNavigate } from "react-router-dom";
+import AddIcon from '@mui/icons-material/Add';
+import { useAddEnquiry } from "../../../../hooks/enquiry/useAddEnquiry";
+import { useGetSalesman } from "../../../../hooks/enquiry/useGetAllSalesman";
+import convertDateToString from "../../../../utils/convertDateToString";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Enquiry {
     clientName: string;
@@ -28,9 +39,7 @@ const validationSchema = Yup.object({
     contactNumber: Yup.string()
         .matches(/^[0-9]{10}$/, "Contact Number must be 10 digits")
         .required("Contact Number is required"),
-    mailId: Yup.string()
-        .email("Invalid email format")
-        .required("Mail ID is required"),
+    mailId: Yup.string().email("Invalid email format").required("Mail ID is required"),
     address: Yup.string().required("Address is required"),
     assignEnquiry: Yup.string().required("Assign Enquiry is required"),
     enquiryFor: Yup.string().required("Enquiry For is required"),
@@ -38,6 +47,14 @@ const validationSchema = Yup.object({
 });
 
 const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
+
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const { data } = useGetClients();
+    const { data: salesmans } = useGetSalesman();
+    const { mutate } = useAddEnquiry();
+
     const initialValues: Enquiry = {
         clientName: "",
         companyName: "",
@@ -51,9 +68,21 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
         enquiryDate: new Date(),
     };
 
-    const handleSubmit = (values: Enquiry) => {
-        console.log(values);
-        onClose();
+    const handleSubmit = (values: Enquiry, { resetForm }: FormikHelpers<Enquiry>) => {
+        mutate({
+            client_id: values.clientName,
+            assign_to: values.assignEnquiry,
+            date: convertDateToString(values.enquiryDate || new Date()),
+            enquiry_for: values.enquiryFor,
+            enquiry_description: values.enquiryDescription,
+        }, {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["enquiries"] });
+                resetForm();
+                onClose();
+            }
+        }
+        )
     };
 
     return (
@@ -79,7 +108,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                         <DatePicker
                             value={new Date()}
                             disabled
-                            renderInput={(params) => (
+                            renderInput={(params: any) => (
                                 <TextField
                                     {...params}
                                     size="small"
@@ -105,25 +134,65 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
                 >
-                    {({ errors, touched }) => (
+                    {({ errors, touched, setFieldValue, values }) => (
                         <Form>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={4}>
-                                    <Field
-                                        as={TextField}
-                                        fullWidth
-                                        label="Client Name"
-                                        name="clientName"
-                                        size="small"
-                                        variant="outlined"
-                                        placeholder="Enter name"
-                                        error={touched.clientName && !!errors.clientName}
-                                        helperText={<ErrorMessage name="clientName" />}
-                                    />
+                                    <FormControl fullWidth size="small">
+                                        <InputLabel>Client Name</InputLabel>
+                                        <Field
+                                            as={Select}
+                                            name="clientName"
+                                            label="Client Name"
+                                            value={values.clientName}
+                                            onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
+                                                const selectedClientName = e.target.value as string;
+                                                setFieldValue("clientName", selectedClientName);
+                                                const selectedClient = data?.data?.find(
+                                                    (client: any) => client._id === selectedClientName
+                                                );
+
+                                                if (selectedClient) {
+                                                    setFieldValue("companyName", selectedClient.client_company || "");
+                                                    setFieldValue("contactNumber", selectedClient.client_phone || "");
+                                                    setFieldValue("mailId", selectedClient.client_email || "");
+                                                    setFieldValue("mapLink", selectedClient.mapLink || "");
+                                                    setFieldValue("address", selectedClient.client_address || "");
+                                                }
+                                            }}
+                                            error={touched.clientName && !!errors.clientName}
+                                        >
+                                            <MenuItem value="">Select Client</MenuItem>
+                                            {data?.data?.map((client: any) => (
+                                                <MenuItem key={client.client_name} value={client._id}>
+                                                    {client.client_name}
+                                                </MenuItem>
+                                            ))}
+                                            <MenuItem
+                                                onClick={() => {
+                                                    navigate("/masters/client");
+                                                }}
+                                                sx={{
+                                                    justifyContent: "center",
+                                                    backgroundColor: "#E3F2FD",
+                                                    color: "#1976D2",
+                                                    "&:hover": {
+                                                        backgroundColor: "#BBDEFB",
+                                                    },
+                                                }}
+                                            >
+                                                <AddIcon sx={{ fontSize: '16px' }} />  Add New Client
+                                            </MenuItem>
+                                        </Field>
+                                        <Typography sx={{ color: "red", fontSize: "12px", mt: 1 }}>
+                                            <ErrorMessage name="clientName" />
+                                        </Typography>
+                                    </FormControl>
                                 </Grid>
                                 <Grid item xs={12} sm={4}>
                                     <Field
                                         as={TextField}
+                                        disabled
                                         fullWidth
                                         label="Company Name"
                                         name="companyName"
@@ -135,6 +204,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                 <Grid item xs={12} sm={4}>
                                     <Field
                                         as={TextField}
+                                        disabled
                                         fullWidth
                                         label="Contact Number"
                                         name="contactNumber"
@@ -148,6 +218,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                 <Grid item xs={12} sm={6}>
                                     <Field
                                         as={TextField}
+                                        disabled
                                         fullWidth
                                         label="Mail ID"
                                         name="mailId"
@@ -161,6 +232,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                 <Grid item xs={12} sm={6}>
                                     <Field
                                         as={TextField}
+                                        disabled
                                         fullWidth
                                         label="Map Link"
                                         name="mapLink"
@@ -172,6 +244,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                 <Grid item xs={12}>
                                     <Field
                                         as={TextField}
+                                        disabled
                                         fullWidth
                                         label="Address"
                                         name="address"
@@ -193,10 +266,12 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                             label="Assign Enquiry"
                                             error={touched.assignEnquiry && !!errors.assignEnquiry}
                                         >
-                                            <MenuItem value="">Select</MenuItem>
-                                            <MenuItem value="Team A">Team A</MenuItem>
-                                            <MenuItem value="Team B">Team B</MenuItem>
-                                            <MenuItem value="Team C">Team C</MenuItem>
+                                            <MenuItem value="">Select Salesman</MenuItem>
+                                            {salesmans?.data?.map((salesman: any) => (
+                                                <MenuItem key={salesman._id} value={salesman._id}>
+                                                    {salesman.user_name}
+                                                </MenuItem>
+                                            ))}
                                         </Field>
                                         <Typography sx={{ color: "red", fontSize: "12px", mt: 1 }}>
                                             <ErrorMessage name="assignEnquiry" />
@@ -241,7 +316,7 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                     type="submit"
                                     variant="contained"
                                     sx={{
-                                        backgroundColor: "#00695C",
+                                        backgroundColor: Colors.primary,
                                         paddingX: 12,
                                         fontWeight: "bold",
                                         color: "#FFFFFF",

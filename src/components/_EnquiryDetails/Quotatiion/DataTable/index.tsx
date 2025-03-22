@@ -4,6 +4,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
 import { useAppDispatch } from "../../../../redux/store";
 import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
+import { Colors } from "../../../../constants/Colors";
 
 interface Quotation {
     id: string;
@@ -15,31 +16,32 @@ interface Quotation {
 
 interface DataTableProps {
     setFlag: (isCreating: boolean) => void;
+    quotations: any[];
 }
 
-const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
+const DataTable: React.FC<DataTableProps> = ({ setFlag, quotations }) => {
 
     const dispatch = useAppDispatch();
 
-    const quotations: Quotation[] = [
-        {
-            id: "25/02/QT00018",
-            quotationDate: "26 Jan 2025",
-            enquiryDate: "25 Jan 2025",
-            amount: "₹27,000",
-            dimensions: "20 * 20",
-        },
-        {
-            id: "25/02/QT00017",
-            quotationDate: "25 Jan 2025",
-            enquiryDate: "25 Jan 2025",
-            amount: "₹36,000",
-            dimensions: "20 * 20",
-        },
-    ];
+    // const quotations: Quotation[] = [
+    //     {
+    //         id: "25/02/QT00018",
+    //         quotationDate: "26 Jan 2025",
+    //         enquiryDate: "25 Jan 2025",
+    //         amount: "₹27,000",
+    //         dimensions: "20 * 20",
+    //     },
+    //     {
+    //         id: "25/02/QT00017",
+    //         quotationDate: "25 Jan 2025",
+    //         enquiryDate: "25 Jan 2025",
+    //         amount: "₹36,000",
+    //         dimensions: "20 * 20",
+    //     },
+    // ];
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",
@@ -155,7 +157,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -165,7 +167,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -175,7 +177,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -188,7 +190,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={5} align="center">
-                                        No data available
+                                        No Quotations available
                                     </TableCell>
                                 </TableRow>
                             )}

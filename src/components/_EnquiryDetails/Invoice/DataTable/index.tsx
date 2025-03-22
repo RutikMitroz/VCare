@@ -5,6 +5,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import InvoicePaymentCard from "../../../ui/Cards/InvoicePaymentCard";
 import InvoiceUpdatePaymentCard from "../../../ui/Cards/InvoiceUpdatePaymentCard";
 import InvoicePaymentHistoryCard from "../../../ui/Cards/InvoicePaymentHistoryCard";
+import { Colors } from "../../../../constants/Colors";
 
 interface invoice {
     invoiceId: string;
@@ -29,7 +30,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
     ];
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",
@@ -141,7 +142,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -151,7 +152,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -161,7 +162,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -186,7 +187,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                         type="submit"
                         variant="contained"
                         sx={{
-                            backgroundColor: "#1D434C",
+                            backgroundColor: Colors.primary,
                             color: "#FFFFFF",
                             borderRadius: "8px",
                             padding: "6px 38px",

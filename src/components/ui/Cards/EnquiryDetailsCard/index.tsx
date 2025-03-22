@@ -2,8 +2,13 @@ import { Card, Typography, Box, IconButton, } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
+import { Colors } from "../../../../constants/Colors";
 
-const EnquiryDetailsCard = () => {
+interface EnquiryDetailsCardProps {
+    enquiryDetails: any;
+}
+
+const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
     return (
         <Card
             sx={{
@@ -24,7 +29,7 @@ const EnquiryDetailsCard = () => {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                     <ExpandMoreIcon
                         sx={{
-                            color: "#00695C",
+                            color: Colors.primary,
                             marginRight: "8px",
                         }}
                     />
@@ -41,7 +46,7 @@ const EnquiryDetailsCard = () => {
                 </Box>
                 <IconButton
                     sx={{
-                        color: "#00695C",
+                        color: Colors.primary,
                     }}
                 >
                     <EditIcon />
@@ -69,25 +74,25 @@ const EnquiryDetailsCard = () => {
                         sx={{
                             fontWeight: "bold",
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                         }}
                     >
-                        CCTV
+                        {enquiryDetails?.enquiry_for}
                     </Typography>
                 </Box>
                 <Typography
                     sx={{
                         fontSize: "14px",
-                        color: "#00695C",
+                        color: Colors.primary,
                         marginLeft: "20px",
                     }}
                 >
-                    ENQUIRY for 3 New CCTV Installation
+                    {enquiryDetails?.enquiry_description}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                     <PersonIcon
                         sx={{
-                            color: "#00695C",
+                            color: Colors.primary,
                             fontSize: "18px",
                             marginRight: "8px",
                         }}
@@ -95,20 +100,19 @@ const EnquiryDetailsCard = () => {
                     <Typography
                         sx={{
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                         }}
                     >
-                        Amit Kumar
+                        {enquiryDetails?.assign_to?.user_name}
                     </Typography>
                 </Box>
                 <Typography
                     sx={{
                         fontSize: "14px",
-                        color: "#00695C",
-                        marginLeft: "32px",
+                        color: Colors.primary,
                     }}
                 >
-                    12/02/2025
+                    {enquiryDetails?.date}
                 </Typography>
             </Box>
         </Card>

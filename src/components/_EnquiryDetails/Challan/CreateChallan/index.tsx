@@ -8,6 +8,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useState } from "react";
+import { Colors } from "../../../../constants/Colors";
 
 interface Challan {
     srNo: string;
@@ -143,7 +144,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                     <Button
                         variant="contained"
                         sx={{
-                            backgroundColor: "#1D434C",
+                            backgroundColor: Colors.primary,
                             color: "#FFFFFF",
                             borderRadius: "8px",
                             padding: "8px 16px",
@@ -178,7 +179,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                     <TableContainer sx={{ bgcolor: "#FFFFFF", borderRadius: 2, mb: 3 }}>
                                         <Table>
                                             <TableHead>
-                                                <TableRow sx={{ bgcolor: "#1D434C" }}>
+                                                <TableRow sx={{ bgcolor: Colors.primary }}>
                                                     {["Sr. No.", "Scan Id", "Products", "Qty.", "Unit", "Action"].map((header) => (
                                                         <TableCell
                                                             key={header}
@@ -376,7 +377,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                             type="submit"
                                             variant="contained"
                                             sx={{
-                                                backgroundColor: "#1D434C",
+                                                backgroundColor: Colors.primary,
                                                 color: "#FFFFFF",
                                                 borderRadius: "8px",
                                                 padding: "8px 24px",

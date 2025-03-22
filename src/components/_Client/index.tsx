@@ -1,10 +1,8 @@
-import React from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Colors } from "../../constants/Colors";
 
-// Common styles for text fields
 const textFieldStyles = {
   backgroundColor: "white",
   "& .MuiOutlinedInput-root": {
@@ -180,7 +178,7 @@ const RenderClient = () => {
                   width: "120px",
                   fontSize: "14px",
                   "&:hover": {
-                    bgcolor: "#1D434C",
+                    bgcolor: Colors.primary,
                   },
                 }}
               >

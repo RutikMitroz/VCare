@@ -2,11 +2,15 @@ import { useState } from 'react';
 import DataTable from './DataTable'
 import CreateQuotationForm from './CreateQuotation';
 
-const Quaotation = () => {
+interface QuotationProps {
+    enquiryDetails: any;
+}
+
+const Quaotation = ({ enquiryDetails }: QuotationProps) => {
     const [flag, setFlag] = useState(false);
     return (
         flag ? <CreateQuotationForm setFlag={setFlag} /> :
-            <DataTable setFlag={setFlag} />
+            <DataTable setFlag={setFlag} quotations={enquiryDetails?.quotations} />
     )
 }
 

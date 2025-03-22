@@ -1,6 +1,7 @@
 import { Box, Button, Card, Chip, Typography } from "@mui/material";
 import { useState } from "react";
 import AddUpdateModal from "../../modals/add-update-modal";
+import { Colors } from "../../../../constants/Colors";
 
 interface Activity {
     by: string;
@@ -74,7 +75,7 @@ const ActivityCard = () => {
                     variant="contained"
                     onClick={handleOpen}
                     sx={{
-                        backgroundColor: "#1D434C",
+                        backgroundColor: Colors.primary,
                         color: "#FFFFFF",
                         textTransform: "Capitalize",
                         borderRadius: "10px",
@@ -120,7 +121,7 @@ const ActivityCard = () => {
                         <Typography
                             sx={{
                                 fontSize: "14px",
-                                color: "#00695C",
+                                color: Colors.primary,
                                 fontWeight: "bold",
                                 marginBottom: activity.reminder ? "8px" : "0px",
                             }}

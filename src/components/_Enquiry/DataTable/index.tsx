@@ -1,9 +1,9 @@
 import React from "react";
 import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, } from "@mui/material";
 import CustomMenuList from "../../utilities/CustomMenuList";
-import convertDateToString from "../../../utils/convertDateToString";
 import { displayShortId } from "../../../utils/displayShortId";
 import { useNavigate } from "react-router-dom";
+import { Colors } from "../../../constants/Colors";
 
 interface DataTableProps {
     enquiries: any[];
@@ -34,7 +34,7 @@ const DataTable = ({
     const navigate = useNavigate();
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "capitalize",
@@ -113,10 +113,10 @@ const DataTable = ({
                                     }}
                                 >
                                     <TableCell align="center">{displayShortId(enquiry._id)}</TableCell>
-                                    <TableCell align="center">{convertDateToString(enquiry?.date)}</TableCell>
+                                    <TableCell align="center">{enquiry?.date}</TableCell>
                                     <TableCell align="center">{enquiry.client_id.client_name}</TableCell>
                                     <TableCell align="center">{enquiry.client_id.client_phone}</TableCell>
-                                    <TableCell align="center">{enquiry.assign_to}</TableCell>
+                                    <TableCell align="center">{enquiry.assign_to.user_name}</TableCell>
                                     <TableCell align="center">{enquiry.enquiry_for}</TableCell>
                                     <TableCell align="center">
                                         <Chip

@@ -4,6 +4,7 @@ import {
     Box, TableBody, Link, Chip,
 } from "@mui/material";
 import CustomMenuList from "../../utilities/CustomMenuList";
+import { Colors } from "../../../constants/Colors";
 
 interface Enquiry {
     id: string;
@@ -51,7 +52,7 @@ const DataTable = ({
     };
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         // fontWeight: "bold",
         fontSize: "14px",
@@ -165,7 +166,7 @@ const DataTable = ({
                                                     component="button"
                                                     underline="hover"
                                                     sx={{
-                                                        color: "#00695C",
+                                                        color: Colors.primary,
                                                         fontWeight: "bold",
                                                         fontSize: "14px",
                                                     }}

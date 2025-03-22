@@ -1,6 +1,7 @@
 import { Card, Typography, Box, Link, } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { Colors } from "../../../../constants/Colors";
 
 interface ClientDetailsCardProps {
     clientDetails: any;
@@ -26,7 +27,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
             >
                 <ExpandMoreIcon
                     sx={{
-                        color: "#00695C",
+                        color: Colors.primary,
                         marginRight: "8px",
                     }}
                 />
@@ -62,7 +63,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
                     <Typography
                         sx={{
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                         }}
                     >
                         {clientDetails?.client_name}
@@ -82,7 +83,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
                     <Typography
                         sx={{
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                         }}
                     >
                         {clientDetails?.client_phone}
@@ -102,7 +103,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
                     <Typography
                         sx={{
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                         }}
                     >
                         {clientDetails?.client_email}
@@ -122,7 +123,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
                     <Typography
                         sx={{
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                             lineHeight: "1.5",
                         }}
                     >
@@ -132,7 +133,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                     <LocationOnIcon
                         sx={{
-                            color: "#00695C",
+                            color: Colors.primary,
                             fontSize: "18px",
                             marginRight: "8px",
                         }}
@@ -143,7 +144,7 @@ const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
                         rel="noopener noreferrer"
                         sx={{
                             fontSize: "14px",
-                            color: "#00695C",
+                            color: Colors.primary,
                             textDecoration: "underline",
                             "&:hover": {
                                 color: "#004D40", 

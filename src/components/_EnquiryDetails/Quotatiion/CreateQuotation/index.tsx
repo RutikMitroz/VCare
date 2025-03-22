@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import { Colors } from "../../../../constants/Colors";
 
 interface Product {
     srNo: string;
@@ -106,7 +107,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                     <Button
                         variant="contained"
                         sx={{
-                            backgroundColor: "#1D434C",
+                            backgroundColor: Colors.primary,
                             color: "#FFFFFF",
                             borderRadius: "8px",
                             padding: "8px 16px",
@@ -146,7 +147,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                         <TableContainer sx={{ bgcolor: "#FFFFFF", borderRadius: 2, mb: 3 }}>
                                             <Table>
                                                 <TableHead>
-                                                    <TableRow sx={{ bgcolor: "#1D434C" }}>
+                                                    <TableRow sx={{ bgcolor: Colors.primary }}>
                                                         {["Sr. No.", "Products", "Qty.", "Unit", "Rate", "Tax %", "Action"].map((header) => (
                                                             <TableCell
                                                                 key={header}
@@ -474,7 +475,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                                 type="submit"
                                                 variant="contained"
                                                 sx={{
-                                                    backgroundColor: "#1D434C",
+                                                    backgroundColor: Colors.primary,
                                                     color: "#FFFFFF",
                                                     borderRadius: "8px",
                                                     padding: "8px 24px",

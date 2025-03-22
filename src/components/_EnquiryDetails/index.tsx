@@ -36,11 +36,14 @@ const RenderEnquiryDetails = () => {
         <Box sx={{ width: "100%", display: "flex", gap: 2 }}>
             <Box sx={{ width: "20%", display: "flex", flexDirection: "column", gap: 2 }}>
                 <ClientDetailsCard clientDetails={data?.data?.client_id} />
-                <EnquiryDetailsCard />
+                <EnquiryDetailsCard enquiryDetails={data?.data} />
             </Box>
             <Box sx={{ width: "60%", display: "flex", flexDirection: "column", gap: 2 }}>
                 <ProgressBar />
-                {currentComponent}
+                {/* {currentComponent} */}
+
+                {data?.data?.status === "not_contacted" && <Quotation enquiryDetails={data?.data} />}
+
             </Box>
             <Box sx={{ width: "20%" }}>
                 <ActivityCard />

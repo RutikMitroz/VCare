@@ -4,6 +4,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
 import { useAppDispatch } from "../../../../redux/store";
 import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
+import { Colors } from "../../../../constants/Colors";
 
 interface challan {
     challanId: string;
@@ -35,7 +36,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
     ];
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",
@@ -147,7 +148,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -157,7 +158,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -167,7 +168,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
