@@ -12,7 +12,10 @@ import Payments from "./pages/Payments";
 import OrderDetail from "./pages/OrderDetail";
 import Order from "./pages/Order";
 import EnquiryDetails from "./pages/EnquiryDetails";
-
+import Product from "./pages/Product";
+import Client from "./pages/Client";
+import UserMaster from "./pages/UserMaster";
+import Supplier from "./pages/Supplier";
 
 function App() {
   window.addEventListener("vite:preloadError", () => {
@@ -37,6 +40,12 @@ function App() {
             <Route path="/payments" element={<Payments />} />
             <Route path="/enquiry/:id" element={<EnquiryDetails />} />
             <Route path="/orders" element={<Order />} />
+            
+            {/* Master Routes */}
+            <Route path="/masters/product" element={<Product />} />
+            <Route path="/masters/client" element={<Client />} />
+            <Route path="/masters/user-master" element={<UserMaster />} />
+            <Route path="/masters/supplier" element={<Supplier />} />
           </Routes>
         )}
       </ErrorBoundary>
