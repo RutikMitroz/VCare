@@ -17,3 +17,5 @@ export const GET_ALL_CLIENTS = "api/client/get";
 // user urls
 export const ADD_USER = "api/user/add";
 
+// order urls
+export const GET_ALL_ORDERS = "api/order/getOrder";

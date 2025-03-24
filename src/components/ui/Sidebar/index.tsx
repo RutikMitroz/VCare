@@ -2,8 +2,14 @@ import { useState } from 'react';
 import EnquiryDataCard from '../Cards/EnquiryDataCard'
 import { Box, FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 
+interface SummaryItem {
+  text: string;
+  value: number;
+  color: string;
+}
+
 interface SidebarProps {
-  summary: any;
+  summary: SummaryItem[];
 }
 
 function Sidebar({ summary }: SidebarProps) {
@@ -12,6 +18,7 @@ function Sidebar({ summary }: SidebarProps) {
   const handleTimeFilterChange = (event: SelectChangeEvent) => {
     setTimeFilter(event.target.value);
   };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
       <FormControl fullWidth sx={{ mb: 2 }}>
@@ -38,10 +45,14 @@ function Sidebar({ summary }: SidebarProps) {
           <MenuItem value="This Year">This Year</MenuItem>
         </Select>
       </FormControl>
-      <EnquiryDataCard text="Total Enquiries" quantity={summary?.totalEnquiries} color="#459CFF" />
-      <EnquiryDataCard text="Quotation Sent" quantity={summary?.quotation_sent} color="#60CA72" />
-      <EnquiryDataCard text="Not Contacted" quantity={summary?.not_contacted} color="#FF0000" />
-      <EnquiryDataCard text="Reminder" quantity={summary?.remainder} color="#1F1F1F" />
+      {summary.map((item, index) => (
+        <EnquiryDataCard
+          key={index}
+          text={item.text}
+          quantity={item.value}
+          color={item.color}
+        />
+      ))}
     </Box>
   )
 }

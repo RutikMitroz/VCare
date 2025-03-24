@@ -1,23 +1,27 @@
 import React from "react";
-import {
-    Table, TableCell, TableContainer, TableHead, TablePagination, TableRow,
-    Box, TableBody, Link, Chip,
-} from "@mui/material";
-import CustomMenuList from "../../utilities/CustomMenuList";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody } from "@mui/material";
+import { displayShortId } from "../../../utils/displayShortId";
+import { useNavigate } from "react-router-dom";
 import { Colors } from "../../../constants/Colors";
 
-interface Enquiry {
-    id: string;
-    date: string;
-    clientName: string;
-    phone: string;
-    assignedTo: string;
-    enquiryFor: string;
-    status: string;
+interface Order {
+    _id: string;
+    quotation_id: {
+        _id: string;
+        clientId: {
+            client_name: string;
+            client_phone: string;
+        };
+        product_name: string;
+        total_amount: number;
+    };
+    order_date: string;
+    order_status: string;
+    estimate_required_time: string;
 }
 
 interface DataTableProps {
-    appointments: Enquiry[];
+    appointments: Order[];
     page: number;
     rowsPerPage: number;
     totalNoOfDocs: number;
@@ -36,32 +40,32 @@ const DataTable = ({
     handleChangePage,
     handleChangeRowsPerPage,
 }: DataTableProps) => {
-    const menuDataRef = React.useRef<Enquiry | null>(null);
-    const [openMenu, setOpenMenu] = React.useState(false);
-    const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
-        null
-    );
-
-    const handleViewDetailsClick = (
-        event: React.MouseEvent<HTMLElement>,
-        row: Enquiry
-    ) => {
-        menuDataRef.current = row;
-        setMenuAnchorEl(event.currentTarget);
-        setOpenMenu(true);
-    };
+    const navigate = useNavigate();
 
     const headerCellStyle = {
         backgroundColor: Colors.primary,
         color: "#FFFFFF",
-        // fontWeight: "bold",
         fontSize: "14px",
+        textTransform: "capitalize",
         borderBottom: "1px solid #E0E0E0",
         padding: "12px",
         position: "sticky",
         top: 0,
         zIndex: 1,
     } as const;
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "In Progress":
+                return "#459CFF";
+            case "Pending":
+                return "#FF0000";
+            case "Completed":
+                return "#60CA72";
+            default:
+                return "#F44336";
+        }
+    };
 
     return (
         <>
@@ -97,7 +101,7 @@ const DataTable = ({
                                     Phone
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Products
+                                    Product
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Total Amount
@@ -105,87 +109,66 @@ const DataTable = ({
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Assigned Technician
                                 </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
+                                <TableCell align="center" sx={{
+                                    ...headerCellStyle,
+                                    borderTopRightRadius: "12px",
+                                }}>
                                     Status
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{
-                                        ...headerCellStyle,
-                                        borderTopRightRadius: "12px",
-                                    }}
-                                >
-                                    Action
                                 </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {appointments.length > 0 ? (
-                                appointments
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    .map((row, index) => (
-                                        <TableRow
-                                            key={row.id}
-                                            sx={{
-                                                backgroundColor:
-                                                    index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
-                                                "&:hover": {
-                                                    backgroundColor: "#E8F0FE",
-                                                },
-                                                "& .MuiTableCell-root": {
-                                                    fontSize: "14px",
-                                                    color: "#424242",
-                                                    borderBottom: "1px solid #E0E0E0",
-                                                    padding: "12px",
-                                                },
+                            {appointments.map((order, index) => (
+                                <TableRow
+                                    onClick={() => navigate(`/enquiry/${order._id}`)}
+                                    key={order._id}
+                                    sx={{
+                                        cursor: "pointer",
+                                        backgroundColor:
+                                            index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
+                                        "&:hover": {
+                                            backgroundColor: "#E8F0FE",
+                                        },
+                                        "& .MuiTableCell-root": {
+                                            fontSize: "14px",
+                                            color: "#424242",
+                                            borderBottom: "1px solid #E0E0E0",
+                                            padding: "12px",
+                                        },
+                                    }}
+                                >
+                                    <TableCell align="center">{displayShortId(order._id)}</TableCell>
+                                    <TableCell align="center">
+                                        {new Date(order.order_date).toLocaleDateString()}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {order.quotation_id.clientId.client_name}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {order.quotation_id.clientId.client_phone}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {order.quotation_id.product_name}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        ₹{order.quotation_id.total_amount}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        Jack Reacher
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <span
+                                            style={{
+                                                color: getStatusColor(order.order_status),
+                                                fontWeight: "500",
+                                                fontSize: "14px",
                                             }}
                                         >
-                                            <TableCell align="center">{row.id}</TableCell>
-                                            <TableCell align="center">{row.date}</TableCell>
-                                            <TableCell align="center">{row.clientName}</TableCell>
-                                            <TableCell align="center">{row.phone}</TableCell>
-                                            <TableCell align="center">{row.assignedTo}</TableCell>
-                                            <TableCell align="center">{row.enquiryFor}</TableCell>
-                                            <TableCell align="center">
-                                                <Chip
-                                                    label={row.status}
-                                                    sx={{
-                                                        backgroundColor:
-                                                            row.status === "QUOTATION SENT"
-                                                                ? "#4CAF50"
-                                                                : "#F44336",
-                                                        color: "#FFFFFF",
-                                                        fontWeight: "bold",
-                                                        fontSize: "12px",
-                                                        height: "24px",
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell align="center">
-                                                <Link
-                                                    component="button"
-                                                    underline="hover"
-                                                    sx={{
-                                                        color: Colors.primary,
-                                                        fontWeight: "bold",
-                                                        fontSize: "14px",
-                                                    }}
-                                                    onClick={(event) =>
-                                                        handleViewDetailsClick(event, row)
-                                                    }
-                                                >
-                                                    View Details
-                                                </Link>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={8} align="center">
-                                        No data available
+                                            {order.order_status}
+                                        </span>
                                     </TableCell>
                                 </TableRow>
-                            )}
+                            ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -205,22 +188,6 @@ const DataTable = ({
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Box>
-
-            {menuAnchorEl && openMenu && menuDataRef.current && (
-                <CustomMenuList
-                    open={openMenu}
-                    setOpenMenu={setOpenMenu}
-                    menuAnchorEl={menuAnchorEl}
-                    setMenuAnchorEl={setMenuAnchorEl}
-                    menuItems={[
-                        {
-                            title: "More details",
-                            iconImage: "/assets/icons/more_details.png",
-                            // fn: () => navigate(`/appointments/${menuDataRef.current?._id ?? ""}`),
-                        },
-                    ]}
-                />
-            )}
         </>
     );
 };
