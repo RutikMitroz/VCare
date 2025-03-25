@@ -1,8 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { makeRequest } from "../../constants/makeRequest";
-import { CREATE_QUOTATION } from "../../constants/urls";
+import { UPDATE_ENQUIRY } from "../../constants/urls";
 
-const addQuotation = async (quotationData: any) => {
+interface UpdateEnquiryProps {
+  enquiryData: any;
+  enquiryId: string;
+}
+
+const updateEnquiry = async ({
+  enquiryData,
+  enquiryId,
+}: UpdateEnquiryProps) => {
   try {
     const res = await makeRequest<{
       success: boolean;
@@ -10,9 +18,10 @@ const addQuotation = async (quotationData: any) => {
       message: string;
       data: any;
     }>({
-      method: "POST",
-      pathname: CREATE_QUOTATION,
-      values: quotationData,
+      method: "PUT",
+      pathname: UPDATE_ENQUIRY(enquiryId),
+      // token: true,
+      values: enquiryData,
       showMessage: true,
       show_success_message: true,
       show_error_message: true,
@@ -29,8 +38,8 @@ const addQuotation = async (quotationData: any) => {
   }
 };
 
-export const useAddQuotation = () => {
+export const useUpdateEnquiry = () => {
   return useMutation({
-    mutationFn: addQuotation,
+    mutationFn: updateEnquiry,
   });
 };

@@ -3,7 +3,6 @@ import {
     Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
 
 const CustomConnector = styled(StepConnector)(() => ({
     [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -55,11 +54,33 @@ const CustomStepIcon = (props: { active: boolean; completed: boolean }) => {
     );
 };
 
-const ProgressBar = () => {
+interface ProgressBarProps {
+    enquiryDetails: any;
+}
+
+const ProgressBar = ({ enquiryDetails }: ProgressBarProps) => {
     const steps = ["Quotations", "Order", "Challan", "Invoice"];
-    const activeStep = useAppSelector((state) => state.progressBar.activeStep);
-    const completedSteps = useAppSelector((state) => state.progressBar.completedSteps);
-    const dispatch = useAppDispatch();
+
+    const getProgress = () => {
+        const hasQuotations = enquiryDetails?.status === "quotation_created";
+        const hasOrders = enquiryDetails?.status === "order_created";
+        const hasChallans = enquiryDetails?.status === "challan_created";
+        const hasInvoices = enquiryDetails?.status === "invoice_created";
+
+        if (hasInvoices) {
+            return { activeStep: 3, completedSteps: [0, 1, 2, 3] };
+        } else if (hasChallans) {
+            return { activeStep: 3, completedSteps: [0, 1, 2] };
+        } else if (hasOrders) {
+            return { activeStep: 2, completedSteps: [0, 1] };
+        } else if (hasQuotations) {
+            return { activeStep: 1, completedSteps: [0] };
+        } else {
+            return { activeStep: 0, completedSteps: [] };
+        }
+    };
+
+    const { activeStep, completedSteps } = getProgress();
 
     return (
         <Box sx={{ width: "100%", backgroundColor: "white", borderRadius: "16px", border: "1px solid black" }}>
@@ -95,7 +116,6 @@ const ProgressBar = () => {
                     </Step>
                 ))}
             </Stepper>
-            {/* Removed Back and Next buttons since progress will be controlled by actions */}
         </Box>
     );
 };

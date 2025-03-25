@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { makeRequest } from "../../constants/makeRequest";
-import { CREATE_QUOTATION } from "../../constants/urls";
+import { CREATE_ORDER } from "../../constants/urls";
 
-const addQuotation = async (quotationData: any) => {
+const createOrder = async (orderData: any) => {
   try {
     const res = await makeRequest<{
       success: boolean;
@@ -11,8 +11,8 @@ const addQuotation = async (quotationData: any) => {
       data: any;
     }>({
       method: "POST",
-      pathname: CREATE_QUOTATION,
-      values: quotationData,
+      pathname: CREATE_ORDER,
+      values: orderData,
       showMessage: true,
       show_success_message: true,
       show_error_message: true,
@@ -29,8 +29,8 @@ const addQuotation = async (quotationData: any) => {
   }
 };
 
-export const useAddQuotation = () => {
+export const useCreateOrder = () => {
   return useMutation({
-    mutationFn: addQuotation,
+    mutationFn: createOrder,
   });
 };
