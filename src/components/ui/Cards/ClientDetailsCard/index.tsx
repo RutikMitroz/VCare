@@ -8,7 +8,6 @@ interface ClientDetailsCardProps {
 }
 
 const ClientDetailsCard = ({ clientDetails }: ClientDetailsCardProps) => {
-    console.log("clientDetails", clientDetails);
     return (
         <Card
             sx={{
