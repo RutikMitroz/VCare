@@ -3,13 +3,15 @@ import { Box, Typography, TextField, Button, Select, MenuItem, FormControl, Inpu
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Colors } from "../../constants/Colors";
+import { useAddUser } from "../../hooks/masters/useAddUser";
 
 // Sample data for role options
 const roleOptions = [
   "Admin",
   "Manager",
   "Supervisor",
-  "Staff"
+  "Staff",
+  "technician"
 ];
 
 // Common styles for text fields
@@ -36,31 +38,39 @@ const textFieldStyles = {
 };
 
 const validationSchema = Yup.object({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string()
+  user_name: Yup.string().required("Name is required"),
+  user_email: Yup.string()
     .email("Invalid email format")
     .required("Mail Id is required"),
-  phoneNumber: Yup.string()
+  user_phone: Yup.string()
     .required("Phone Number is required")
     .matches(/^[0-9]+$/, "Must be only digits")
     .min(10, "Must be exactly 10 digits")
     .max(10, "Must be exactly 10 digits"),
-  role: Yup.string().required("Role is required"),
-  address: Yup.string().required("Address is required")
+  user_role: Yup.string().required("Role is required"),
+  user_address: Yup.string().required("Address is required")
 });
 
 const RenderUserMaster = () => {
+  const addUserMutation = useAddUser();
+
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      phoneNumber: "",
-      role: "",
-      address: ""
+      user_name: "",
+      user_email: "",
+      user_phone: "",
+      user_role: "",
+      user_address: ""
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: async (values, { resetForm }) => {
+        await addUserMutation.mutateAsync({
+          ...values,
+          successCB: () => {
+            resetForm()
+          }
+        });
+
     }
   });
 
@@ -91,45 +101,45 @@ const RenderUserMaster = () => {
             <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2rem" }}>
               <TextField
                 fullWidth
-                name="name"
+                name="user_name"
                 label="Name"
-                value={formik.values.name}
+                value={formik.values.user_name}
                 onChange={formik.handleChange}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
+                error={formik.touched.user_name && Boolean(formik.errors.user_name)}
+                helperText={formik.touched.user_name && formik.errors.user_name}
                 placeholder="Enter name"
                 sx={textFieldStyles}
               />
 
               <TextField
                 fullWidth
-                name="email"
+                name="user_email"
                 label="Mail Id"
                 type="email"
-                value={formik.values.email}
+                value={formik.values.user_email}
                 onChange={formik.handleChange}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
+                error={formik.touched.user_email && Boolean(formik.errors.user_email)}
+                helperText={formik.touched.user_email && formik.errors.user_email}
                 placeholder="Enter email id"
                 sx={textFieldStyles}
               />
 
               <TextField
                 fullWidth
-                name="phoneNumber"
+                name="user_phone"
                 label="Phone Number"
-                value={formik.values.phoneNumber}
+                value={formik.values.user_phone}
                 onChange={formik.handleChange}
-                error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
-                helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
-                placeholder="Enter sub unit name"
+                error={formik.touched.user_phone && Boolean(formik.errors.user_phone)}
+                helperText={formik.touched.user_phone && formik.errors.user_phone}
+                placeholder="Enter phone number"
                 sx={textFieldStyles}
               />
             </Box>
 
             {/* Role Field */}
             <FormControl 
-              error={formik.touched.role && Boolean(formik.errors.role)}
+              error={formik.touched.user_role && Boolean(formik.errors.user_role)}
               sx={{
                 ...textFieldStyles,
                 maxWidth: "calc(33.33% - 1.33rem)" // To match the width of one column in the 3-column grid
@@ -137,8 +147,8 @@ const RenderUserMaster = () => {
             >
               <InputLabel>Role</InputLabel>
               <Select
-                name="role"
-                value={formik.values.role}
+                name="user_role"
+                value={formik.values.user_role}
                 onChange={formik.handleChange}
                 label="Role"
                 sx={{
@@ -152,23 +162,23 @@ const RenderUserMaster = () => {
                   </MenuItem>
                 ))}
               </Select>
-              {formik.touched.role && formik.errors.role && (
-                <FormHelperText>{formik.errors.role}</FormHelperText>
+              {formik.touched.user_role && formik.errors.user_role && (
+                <FormHelperText>{formik.errors.user_role}</FormHelperText>
               )}
             </FormControl>
 
             {/* Address Field */}
             <TextField
               fullWidth
-              name="address"
+              name="user_address"
               label="Address"
               multiline
               rows={4}
-              value={formik.values.address}
+              value={formik.values.user_address}
               onChange={formik.handleChange}
-              error={formik.touched.address && Boolean(formik.errors.address)}
-              helperText={formik.touched.address && formik.errors.address}
-              placeholder="Enter Details"
+              error={formik.touched.user_address && Boolean(formik.errors.user_address)}
+              helperText={formik.touched.user_address && formik.errors.user_address}
+              placeholder="Enter address"
               sx={{
                 ...textFieldStyles,
                 "& .MuiOutlinedInput-root": {
@@ -183,6 +193,7 @@ const RenderUserMaster = () => {
               <Button
                 type="submit"
                 variant="contained"
+                disabled={addUserMutation.isPending}
                 sx={{
                   bgcolor: Colors.primary,
                   color: "white",
@@ -193,12 +204,13 @@ const RenderUserMaster = () => {
                   },
                 }}
               >
-                Save
+                {addUserMutation.isPending ? "Saving..." : "Save"}
               </Button>
               <Button
                 type="button"
                 variant="contained"
                 onClick={() => formik.resetForm()}
+                disabled={addUserMutation.isPending}
                 sx={{
                   bgcolor: "#E2E8F0",
                   color: "black",

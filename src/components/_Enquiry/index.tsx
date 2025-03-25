@@ -27,7 +27,7 @@ const RenderEnquiry = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const { data, isFetching, isError } = useGetEnquiries({ page, limit: rowsPerPage });
+  const { data, isFetching, isError } = useGetEnquiries({ page, limit: rowsPerPage })
 
   return (
     <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" }}>
