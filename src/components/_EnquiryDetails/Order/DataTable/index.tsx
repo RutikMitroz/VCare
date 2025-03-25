@@ -1,39 +1,20 @@
 import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, Button, } from "@mui/material";
 import OrderIdAndDateCard from "../../../ui/Cards/OrderIdAndDateCard";
-import { useAppDispatch } from "../../../../redux/store";
-import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
 import { Colors } from "../../../../constants/Colors";
+import convertDateToString from "../../../../utils/convertDateToString";
+import { displayShortId } from "../../../../utils/displayShortId";
+import { useUpdateEnquiry } from "../../../../hooks/enquiry/useUpdateEnquiry";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface Quotation {
-    id: string;
-    products: string;
-    qty: string;
-    hsnNo: string;
-    unit: string;
-    rate: string;
+interface DataTableProps {
+    orderDetails: any;
+    enquiryId: string;
 }
 
-const DataTable = () => {
+const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
 
-    const dispatch = useAppDispatch();
-    const quotations: Quotation[] = [
-        {
-            id: "25/02/QT00018",
-            products: "Hikvision 5MP CCTV Camera",
-            qty: "10",
-            hsnNo: "₹75ut4",
-            unit: "20",
-            rate: "₹36,000",
-        },
-        {
-            id: "25/02/QT00018",
-            products: "Hikvision 5MP CCTV Camera",
-            qty: "70",
-            hsnNo: "₹75tyt4",
-            unit: "10",
-            rate: "₹65,000",
-        },
-    ];
+    const { mutate } = useUpdateEnquiry();
+    const queryClient = useQueryClient();
 
     const headerCellStyle = {
         backgroundColor: Colors.primary,
@@ -57,11 +38,23 @@ const DataTable = () => {
                 }}
             >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <OrderIdAndDateCard label="Order ID" value="25/02/QT00018" />
-                    <OrderIdAndDateCard label="Order Date" value="25 Jan 2025" />
+                    <OrderIdAndDateCard label="Order ID" value={orderDetails?._id} />
+                    <OrderIdAndDateCard label="Order Date" value={convertDateToString(orderDetails?.createdAt)} />
                 </Box>
                 <Button
-                    onClick={() => dispatch(moveToNextStep())}
+                    onClick={() => {
+                        mutate({
+                            enquiryId: enquiryId,
+                            enquiryData: {
+                                status: "order_created"
+                            }
+                        }, {
+                            onSuccess: () => {
+                                queryClient.invalidateQueries({ queryKey: ['enquiries'] });
+                                queryClient.invalidateQueries({ queryKey: ['enquiry-by-id', enquiryId] });
+                            }
+                        })
+                    }}
                     variant="contained"
                     sx={{
                         backgroundColor: '#1D434C',
@@ -104,7 +97,7 @@ const DataTable = () => {
                                     Sr No.
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Products
+                                    Product Name
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Qty.
@@ -125,10 +118,10 @@ const DataTable = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {quotations.length > 0 ? (
-                                quotations.map((row, index) => (
+                            {orderDetails?.quotation_id?.products?.length > 0 ? (
+                                orderDetails?.quotation_id?.products?.map((product: any, index: number) => (
                                     <TableRow
-                                        key={row.id}
+                                        key={product?._id?._id}
                                         sx={{
                                             backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
                                             "&:hover": {
@@ -142,18 +135,20 @@ const DataTable = () => {
                                             },
                                         }}
                                     >
-                                        <TableCell align="center">{row.id}</TableCell>
-                                        <TableCell align="center">{row.products}</TableCell>
-                                        <TableCell align="center">{row.qty}</TableCell>
-                                        <TableCell align="center">{row.hsnNo}</TableCell>
-                                        <TableCell align="center">{row.unit}</TableCell>
-                                        <TableCell align="center">{row.rate}</TableCell>
+                                        <TableCell align="center">{displayShortId(product?._id?._id)}</TableCell>
+                                        <TableCell align="center">{product?._id?.product_name}</TableCell>
+                                        <TableCell align="center">{product?._id?.qty}</TableCell>
+                                        <TableCell align="center">{product?._id?.HSN_code
+                                        }</TableCell>
+                                        <TableCell align="center">{product?._id?.unit}</TableCell>
+                                        <TableCell align="center">{product?._id?.product_price
+                                        }</TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={5} align="center">
-                                        No data available
+                                        No products available
                                     </TableCell>
                                 </TableRow>
                             )}

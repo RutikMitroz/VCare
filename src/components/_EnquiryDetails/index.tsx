@@ -5,32 +5,32 @@ import ActivityCard from "../ui/Cards/ActivityCard";
 import ProgressBar from "../ui/ProgressBar";
 import Quotation from "./Quotatiion";
 import Order from "./Order";
-import { useAppSelector } from "../../redux/store";
 import Challan from "./Challan";
 import Invoice from "./Invoice";
 import { useGetEnquiryById } from "../../hooks/enquiry/useGetEnquiryById";
 import { useParams } from "react-router-dom";
 
 const RenderEnquiryDetails = () => {
-
     const { enquiryId } = useParams<{ enquiryId: string }>();
-
     const { data } = useGetEnquiryById(enquiryId || "");
 
-    const activeStep = useAppSelector((state) => state.progressBar.activeStep);
+    const renderComponent = () => {
+        const enquiryDetails = data?.data;
 
-    const stepComponents = [
-        <Quotation key="quotation" />,
-        <Order key="order" />,
-        <Challan key="challan" />,
-        <Invoice key="invoice" />,
-    ];
+        const hasQuotations = enquiryDetails?.status === "quotation_created";
+        const hasOrders = enquiryDetails?.status === "order_created";
+        const hasChallans = enquiryDetails?.status === "challan_created";
 
-    const currentComponent =
-        activeStep >= 0 && activeStep < stepComponents.length
-            ? stepComponents[activeStep]
-            : <div>Unknown Step</div>;
-
+        if (hasChallans) {
+            return <Invoice enquiryDetails={enquiryDetails} />;
+        } else if (hasOrders) {
+            return <Challan enquiryDetails={enquiryDetails} />;
+        } else if (hasQuotations) {
+            return <Order enquiryDetails={enquiryDetails} />;
+        } else {
+            return <Quotation enquiryDetails={enquiryDetails} />;
+        }
+    };
 
     return (
         <Box sx={{ width: "100%", display: "flex", gap: 2 }}>
@@ -39,11 +39,8 @@ const RenderEnquiryDetails = () => {
                 <EnquiryDetailsCard enquiryDetails={data?.data} />
             </Box>
             <Box sx={{ width: "60%", display: "flex", flexDirection: "column", gap: 2 }}>
-                <ProgressBar />
-                {/* {currentComponent} */}
-
-                {data?.data?.status === "not_contacted" && <Quotation enquiryDetails={data?.data} />}
-
+                <ProgressBar enquiryDetails={data?.data} />
+                {data?.data && renderComponent()}
             </Box>
             <Box sx={{ width: "20%" }}>
                 <ActivityCard />

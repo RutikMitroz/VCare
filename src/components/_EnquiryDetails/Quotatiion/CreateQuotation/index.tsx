@@ -2,19 +2,22 @@ import { Formik, Form, Field, FieldArray } from "formik";
 import * as Yup from "yup";
 import {
     Box, Typography, TextField, Button, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, IconButton, Grid,
+    TableContainer, TableHead, TableRow, IconButton, Grid, Autocomplete,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { Colors } from "../../../../constants/Colors";
+import { useGetProducts } from "../../../../hooks/enquiry/useGetAllProducts";
+import { useState, useEffect } from "react";
+import useDebounce from "../../../../hooks/utilities/useDebounceFunc";
+import { useAddQuotation } from "../../../../hooks/enquiry/useAddQuotation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Product {
-    srNo: string;
-    product: string;
-    quantity: number | "";
+    _id: string;
+    product_name: string;
     unit: string;
-    rate: number | "";
-    taxPercent: number | "";
+    product_price: number | "";
 }
 
 interface Quotation {
@@ -24,25 +27,20 @@ interface Quotation {
 
 interface CreateQuotationFormProps {
     setFlag: (isCreating: boolean) => void;
+    enquiryId: string;
+    clientId: string;
 }
 
 const validationSchema = Yup.object({
     products: Yup.array()
         .of(
             Yup.object({
-                srNo: Yup.string().required("Sr. No. is required"),
-                product: Yup.string().required("Product is required"),
-                quantity: Yup.number()
-                    .required("Quantity is required")
-                    .min(1, "Quantity must be at least 1"),
+                _id: Yup.string().required("Sr. No. is required"),
+                product_name: Yup.string().required("Product name is required"),
                 unit: Yup.string().required("Unit is required"),
-                rate: Yup.number()
-                    .required("Rate is required")
-                    .min(0, "Rate cannot be negative"),
-                taxPercent: Yup.number()
-                    .required("Tax % is required")
-                    .min(0, "Tax % cannot be negative")
-                    .max(100, "Tax % cannot exceed 100"),
+                product_price: Yup.number()
+                    .required("Product price is required")
+                    .min(0, "Product price cannot be negative"),
             })
         )
         .min(1, "At least one product is required"),
@@ -52,34 +50,45 @@ const validationSchema = Yup.object({
         .max(100, "Discount % cannot exceed 100"),
 });
 
-const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) => {
+const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enquiryId, clientId }) => {
     const initialValues: Quotation = {
-        products: [
-            {
-                srNo: "#0001",
-                product: "Hikvision 5MP CCTV Camera",
-                quantity: 6,
-                unit: "NOS",
-                rate: 2000,
-                taxPercent: 18,
-            },
-        ],
-        discountPercent: 10,
+        products: [],
+        discountPercent: 0,
     };
+
+    const queryClient = useQueryClient();
+
+    const [searchStates, setSearchStates] = useState<string[]>([]);
+    const [allProducts, setAllProducts] = useState<Product[]>([]);
+
+    const updateSearchState = (index: number, value: string) => {
+        setSearchStates((prev) => {
+            const newStates = [...prev];
+            newStates[index] = value;
+            return newStates;
+        });
+    };
+
+    const { mutate } = useAddQuotation();
+
+    const { data: productsData, isLoading } = useGetProducts("");
+    useEffect(() => {
+        if (productsData) {
+            setAllProducts(productsData);
+        }
+    }, [productsData]);
+
+    const debouncedSetSearch = useDebounce((index: number, value: string) => {
+        updateSearchState(index, value);
+    }, 750);
 
     const calculateTotals = (products: Product[], discountPercent: number | "") => {
         const totalAmount = products.reduce((sum, product) => {
-            const qty = Number(product.quantity) || 0;
-            const rate = Number(product.rate) || 0;
-            return sum + qty * rate;
+            const product_price = Number(product.product_price) || 0;
+            return sum + product_price;
         }, 0);
 
-        const taxableAmount = products.reduce((sum, product) => {
-            const qty = Number(product.quantity) || 0;
-            const rate = Number(product.rate) || 0;
-            const taxPercent = Number(product.taxPercent) || 0;
-            return sum + (qty * rate * taxPercent) / 100;
-        }, 0);
+        const taxableAmount = 0;
 
         const discountAmount =
             ((totalAmount + taxableAmount) * (Number(discountPercent) || 0)) / 100;
@@ -89,9 +98,14 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
         return { totalAmount, taxableAmount, discountAmount, netAmount };
     };
 
+    const isLastProductComplete = (products: Product[]) => {
+        if (products.length === 0) return true;
+        const lastProduct = products[products.length - 1];
+        return !!lastProduct.product_name;
+    };
+
     return (
         <Box>
-            {/* Header Section */}
             <Box
                 sx={{
                     display: "flex",
@@ -101,7 +115,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                 }}
             >
                 <Typography sx={{ fontSize: 18, fontWeight: "bold", color: "#424242" }}>
-                    Quotation {/* Updated to singular for consistency */}
+                    Quotation
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2 }}>
                     <Button
@@ -115,9 +129,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                             fontSize: "14px",
                             fontWeight: "bold",
                             height: "2.5rem",
-                            "&:hover": {
-                                backgroundColor: "#004D40",
-                            },
+                            "&:hover": { backgroundColor: "#004D40" },
                         }}
                     >
                         Preview
@@ -129,11 +141,31 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={(values) => {
-                    console.log("Form Values:", values);
-                    setFlag(false); // Close the form after submission
+                    const { totalAmount, taxableAmount, discountAmount, netAmount } = calculateTotals(
+                        values.products,
+                        values.discountPercent
+                    );
+                    const payload = {
+                        enquiry_id: enquiryId,
+                        clientId,
+                        products: values.products,
+                        total_amount: totalAmount,
+                        taxable_amount: taxableAmount,
+                        discount: values.discountPercent,
+                        discount_amount: discountAmount,
+                        net_amount: netAmount,
+                    };
+                    mutate(payload, {
+                        onSuccess: () => {
+                            queryClient.invalidateQueries({ queryKey: ["quotations-by-enquiry-id"] });
+                            queryClient.invalidateQueries({ queryKey: ['enquiry-by-id', enquiryId] });
+                            queryClient.invalidateQueries({ queryKey: ['enquiries'] });
+                        }
+                    });
+                    setFlag(false);
                 }}
             >
-                {({ values, errors, touched }) => {
+                {({ values, errors, touched, setFieldValue }) => {
                     const { totalAmount, taxableAmount, discountAmount, netAmount } = calculateTotals(
                         values.products,
                         values.discountPercent
@@ -148,7 +180,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                             <Table>
                                                 <TableHead>
                                                     <TableRow sx={{ bgcolor: Colors.primary }}>
-                                                        {["Sr. No.", "Products", "Qty.", "Unit", "Rate", "Tax %", "Action"].map((header) => (
+                                                        {["Sr. No.", "Product Name", "Unit", "Price", "Action"].map((header) => (
                                                             <TableCell
                                                                 key={header}
                                                                 sx={{
@@ -165,202 +197,232 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
-                                                    {values.products.map((product, index) => (
-                                                        <TableRow key={index}>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    name={`products[${index}].srNo`}
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            fontSize: "14px",
-                                                                            borderRadius: "8px",
-                                                                        },
-                                                                    }}
-                                                                    error={
-                                                                        touched.products?.[index]?.srNo && !!errors.products?.[index]?.srNo
-                                                                    }
-                                                                    helperText={
-                                                                        touched.products?.[index]?.srNo && errors.products?.[index]?.srNo ? (
-                                                                            <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                {errors.products[index].srNo}
-                                                                            </Typography>
-                                                                        ) : null
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    name={`products[${index}].product`}
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            fontSize: "14px",
-                                                                            borderRadius: "8px",
-                                                                        },
-                                                                    }}
-                                                                    error={
-                                                                        touched.products?.[index]?.product &&
-                                                                        !!errors.products?.[index]?.product
-                                                                    }
-                                                                    helperText={
-                                                                        touched.products?.[index]?.product &&
-                                                                            errors.products?.[index]?.product ? (
-                                                                            <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                {errors.products[index].product}
-                                                                            </Typography>
-                                                                        ) : null
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    name={`products[${index}].quantity`}
-                                                                    type="number"
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            fontSize: "14px",
-                                                                            borderRadius: "8px",
-                                                                        },
-                                                                    }}
-                                                                    error={
-                                                                        touched.products?.[index]?.quantity &&
-                                                                        !!errors.products?.[index]?.quantity
-                                                                    }
-                                                                    helperText={
-                                                                        touched.products?.[index]?.quantity &&
-                                                                            errors.products?.[index]?.quantity ? (
-                                                                            <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                {errors.products[index].quantity}
-                                                                            </Typography>
-                                                                        ) : null
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    name={`products[${index}].unit`}
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            fontSize: "14px",
-                                                                            borderRadius: "8px",
-                                                                        },
-                                                                    }}
-                                                                    error={
-                                                                        touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
-                                                                    }
-                                                                    helperText={
-                                                                        touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
-                                                                            <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                {errors.products[index].unit}
-                                                                            </Typography>
-                                                                        ) : null
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    name={`products[${index}].rate`}
-                                                                    type="number"
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            fontSize: "14px",
-                                                                            borderRadius: "8px",
-                                                                        },
-                                                                    }}
-                                                                    error={
-                                                                        touched.products?.[index]?.rate && !!errors.products?.[index]?.rate
-                                                                    }
-                                                                    helperText={
-                                                                        touched.products?.[index]?.rate && errors.products?.[index]?.rate ? (
-                                                                            <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                {errors.products[index].rate}
-                                                                            </Typography>
-                                                                        ) : null
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    name={`products[${index}].taxPercent`}
-                                                                    type="number"
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            fontSize: "14px",
-                                                                            borderRadius: "8px",
-                                                                        },
-                                                                    }}
-                                                                    error={
-                                                                        touched.products?.[index]?.taxPercent &&
-                                                                        !!errors.products?.[index]?.taxPercent
-                                                                    }
-                                                                    helperText={
-                                                                        touched.products?.[index]?.taxPercent &&
-                                                                            errors.products?.[index]?.taxPercent ? (
-                                                                            <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                {errors.products[index].taxPercent}
-                                                                            </Typography>
-                                                                        ) : null
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell sx={{ padding: "8px" }}>
-                                                                <IconButton
-                                                                    onClick={() => remove(index)}
-                                                                    sx={{
-                                                                        backgroundColor: "#FF0000",
-                                                                        color: "#FFFFFF",
-                                                                        "&:hover": {
-                                                                            backgroundColor: "#CC0000",
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
+                                                    {values.products.map((product, index) => {
+                                                        const selectedProduct = allProducts.find(
+                                                            (p) => p._id === product._id
+                                                        );
+                                                        const isPredefined = !!selectedProduct;
+                                                        const currentSearch = searchStates[index] || "";
+
+                                                        const filteredProducts = allProducts.filter((p) =>
+                                                            p.product_name.toLowerCase().includes(currentSearch.toLowerCase())
+                                                        );
+
+                                                        return (
+                                                            <TableRow key={index}>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}]._id`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        disabled={isPredefined}
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                                width: "100px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?._id && !!errors.products?.[index]?._id
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?._id && errors.products?.[index]?._id ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index]._id}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field name={`products[${index}].product_name`}>
+                                                                        {({ field }: any) => (
+                                                                            <Autocomplete
+                                                                                options={filteredProducts.map((p) => ({
+                                                                                    label: p.product_name,
+                                                                                    _id: p._id,
+                                                                                }))}
+                                                                                getOptionLabel={(option) => option.label}
+                                                                                value={
+                                                                                    allProducts.find((p) => p._id === product._id)
+                                                                                        ? { label: product.product_name, _id: product._id }
+                                                                                        : null
+                                                                                }
+                                                                                onChange={(event, newValue) => {
+                                                                                    const selected = allProducts.find((p) => p._id === newValue?._id);
+                                                                                    if (selected) {
+                                                                                        setFieldValue(`products[${index}]._id`, selected._id);
+                                                                                        setFieldValue(`products[${index}].product_name`, selected.product_name);
+                                                                                        setFieldValue(`products[${index}].unit`, selected.unit);
+                                                                                        setFieldValue(`products[${index}].product_price`, selected.product_price);
+                                                                                        updateSearchState(index, "");
+                                                                                    } else {
+                                                                                        setFieldValue(`products[${index}]._id`, "");
+                                                                                        setFieldValue(`products[${index}].product_name`, "");
+                                                                                        setFieldValue(`products[${index}].unit`, "");
+                                                                                        setFieldValue(`products[${index}].product_price`, "");
+                                                                                    }
+                                                                                }}
+                                                                                onInputChange={(event, newInputValue) => {
+                                                                                    if (!isPredefined) {
+                                                                                        debouncedSetSearch(index, newInputValue);
+                                                                                    }
+                                                                                }}
+                                                                                loading={isLoading}
+                                                                                noOptionsText={filteredProducts.length === 0 && currentSearch ? "No products found" : "Type to search"}
+                                                                                disablePortal
+                                                                                open={currentSearch.length > 0 && !isPredefined}
+                                                                                ListboxProps={{
+                                                                                    sx: {
+                                                                                        maxHeight: "150px",
+                                                                                        overflowY: "auto",
+                                                                                        "& .MuiAutocomplete-option": {
+                                                                                            fontSize: "12px",
+                                                                                        },
+                                                                                    },
+                                                                                }}
+                                                                                sx={{
+                                                                                    "& .MuiAutocomplete-popper": {
+                                                                                        width: isPredefined ? "220px !important" : "170px !important",
+                                                                                    },
+                                                                                }}
+                                                                                renderInput={(params) => (
+                                                                                    <TextField
+                                                                                        {...params}
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        fullWidth
+                                                                                        disabled={isPredefined}
+                                                                                        sx={{
+                                                                                            "& .MuiInputBase-root": {
+                                                                                                fontSize: "14px",
+                                                                                                borderRadius: "8px",
+                                                                                                width: isPredefined ? "200px" : "150px",
+                                                                                                transition: "width 0.3s ease",
+                                                                                            },
+                                                                                        }}
+                                                                                        error={
+                                                                                            touched.products?.[index]?.product_name &&
+                                                                                            !!errors.products?.[index]?.product_name
+                                                                                        }
+                                                                                        helperText={
+                                                                                            touched.products?.[index]?.product_name &&
+                                                                                                errors.products?.[index]?.product_name ? (
+                                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                                    {errors.products[index].product_name}
+                                                                                                </Typography>
+                                                                                            ) : null
+                                                                                        }
+                                                                                        InputProps={{
+                                                                                            ...params.InputProps,
+                                                                                            endAdornment: (
+                                                                                                <>
+                                                                                                    {isLoading && !isPredefined ? <span>Loading...</span> : null}
+                                                                                                    {params.InputProps.endAdornment}
+                                                                                                </>
+                                                                                            ),
+                                                                                        }}
+                                                                                    />
+                                                                                )}
+                                                                            />
+                                                                        )}
+                                                                    </Field>
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].unit`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        disabled={isPredefined}
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                                width: "100px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].unit}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].product_price`}
+                                                                        type="number"
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        disabled={isPredefined}
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                                width: "100px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.product_price &&
+                                                                            !!errors.products?.[index]?.product_price
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.product_price &&
+                                                                                errors.products?.[index]?.product_price ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].product_price}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <IconButton
+                                                                        onClick={() => {
+                                                                            remove(index);
+                                                                            setSearchStates((prev) => prev.filter((_, i) => i !== index));
+                                                                        }}
+                                                                        sx={{
+                                                                            backgroundColor: "#FF0000",
+                                                                            color: "#FFFFFF",
+                                                                            "&:hover": { backgroundColor: "#CC0000" },
+                                                                        }}
+                                                                    >
+                                                                        <DeleteIcon />
+                                                                    </IconButton>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    })}
                                                     <TableRow>
-                                                        <TableCell colSpan={7} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
+                                                        <TableCell colSpan={5} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
                                                             <IconButton
-                                                                onClick={() =>
+                                                                onClick={() => {
                                                                     push({
-                                                                        srNo: `#${(values.products.length + 1).toString().padStart(4, "0")}`,
-                                                                        product: "",
-                                                                        quantity: "",
+                                                                        _id: "",
+                                                                        product_name: "",
                                                                         unit: "",
-                                                                        rate: "",
-                                                                        taxPercent: "",
-                                                                    })
-                                                                }
+                                                                        product_price: "",
+                                                                    });
+                                                                    setSearchStates((prev) => [...prev, ""]);
+                                                                }}
+                                                                disabled={!isLastProductComplete(values.products)}
                                                                 sx={{
-                                                                    backgroundColor: "#2196F3",
+                                                                    backgroundColor: isLastProductComplete(values.products) ? "#2196F3" : "#B0BEC5",
                                                                     color: "#FFFFFF",
-                                                                    "&:hover": {
-                                                                        backgroundColor: "#1976D2",
-                                                                    },
+                                                                    "&:hover": { backgroundColor: isLastProductComplete(values.products) ? "#1976D2" : "#B0BEC5" },
                                                                 }}
                                                             >
                                                                 <AddIcon />
@@ -371,7 +433,6 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                             </Table>
                                         </TableContainer>
 
-                                        {/* Totals Section */}
                                         <Grid container spacing={2} sx={{ mb: 3 }}>
                                             <Grid item xs={12} sm={2.4}>
                                                 <TextField
@@ -469,7 +530,6 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                             </Grid>
                                         </Grid>
 
-                                        {/* Save and Cancel Buttons */}
                                         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
                                             <Button
                                                 type="submit"
@@ -482,9 +542,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                                     textTransform: "capitalize",
                                                     fontSize: "14px",
                                                     fontWeight: "bold",
-                                                    "&:hover": {
-                                                        backgroundColor: "#004D40",
-                                                    },
+                                                    "&:hover": { backgroundColor: "#004D40" },
                                                 }}
                                             >
                                                 Save
@@ -500,9 +558,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag }) =>
                                                     textTransform: "capitalize",
                                                     fontSize: "14px",
                                                     fontWeight: "bold",
-                                                    "&:hover": {
-                                                        backgroundColor: "#B0BEC5",
-                                                    },
+                                                    "&:hover": { backgroundColor: "#B0BEC5" },
                                                 }}
                                             >
                                                 Cancel
