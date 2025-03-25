@@ -2,7 +2,7 @@ import { Formik, Form, Field, FieldArray } from "formik";
 import * as Yup from "yup";
 import {
     Box, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead,
-    TableRow, IconButton, Menu, MenuItem,
+    TableRow, IconButton, Menu, MenuItem, Checkbox,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,18 +10,20 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useState } from "react";
 import { Colors } from "../../../../constants/Colors";
 import { useGetOrderByEnquiryId } from "../../../../hooks/enquiry/useGetOrderByEnquiry";
+import Spinner from "../../../utilities/Spinner";
+import { useGetAllUsers } from "../../../../hooks/enquiry/useGetAllUsers";
+import { useAddChallan } from "../../../../hooks/enquiry/useAddChallan";
 
-// interface Challan {
-//     srNo: string;
-//     scanId: string;
-//     products: string;
-//     quantity: string;
-//     unit: string;
-// }
+interface Product {
+    _id: string;
+    scanId: string;
+    product_name: string;
+    quantity: string;
+    unit: string;
+}
 
 interface FormValues {
-    products: any[];
-    assign_to: any[];
+    products: Product[];
     order_id: string;
     enquiry_id: string;
 }
@@ -35,9 +37,9 @@ const validationSchema = Yup.object({
     products: Yup.array()
         .of(
             Yup.object({
-                srNo: Yup.string().required("Sr. No. is required"),
+                _id: Yup.string().required("Sr. No. is required"),
                 scanId: Yup.string().required("Scan ID is required"),
-                products: Yup.string().required("Product is required"),
+                product_name: Yup.string().required("Product is required"),
                 quantity: Yup.number()
                     .required("Quantity is required")
                     .min(1, "Quantity must be at least 1"),
@@ -45,33 +47,21 @@ const validationSchema = Yup.object({
             })
         )
         .min(1, "At least one product is required"),
-    assignTo: Yup.string().required("Please select an option to assign the challan"),
 });
 
 const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryDetails }) => {
-
-    console.log("enquiryDetails :", enquiryDetails._id);
-    
-
-    const { data } = useGetOrderByEnquiryId(enquiryDetails?._id);
-
-
-    console.log("products1 :",data);
-    console.log("products2:",data?.data);
-    console.log("products3 :",data?.data?.quotation_id);
-    console.log("products4 :",data?.data?.quotation_id?.products);
-
-
+    const { data, isFetching } = useGetOrderByEnquiryId(enquiryDetails?._id);
+    const { data: userList, isLoading: usersLoading } = useGetAllUsers();
+    const { mutate } = useAddChallan();
 
     const initialValues: FormValues = {
-        products: data?.data?.quotation_id?.products,
+        products: data?.data?.quotation_id?.products || [],
         enquiry_id: enquiryDetails?._id,
         order_id: data?.data?._id,
-        assign_to: [],
     };
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedAssignTo, setSelectedAssignTo] = useState<string>("");
+    const [selectedAssignTo, setSelectedAssignTo] = useState<string[]>([]);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -82,352 +72,410 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
         setAnchorEl(null);
     };
 
-    const assignOptions = [
-        { value: "teamA", label: "Team A" },
-        { value: "teamB", label: "Team B" },
-        { value: "teamC", label: "Team C" },
-    ];
+    const handleMenuItemClick = (userId: string) => {
+        setSelectedAssignTo((prev) =>
+            prev.includes(userId)
+                ? prev.filter((id) => id !== userId)
+                : [...prev, userId]
+        );
+    };
+
+    const handleSubmit = (values: FormValues) => {
+        const productList = values?.products?.map((product) => product?._id);
+        const challanData = {
+            enquiry_id: values?.enquiry_id,
+            order_id: values?.order_id,
+            products: productList,
+            assign_to: selectedAssignTo,
+        };
+        mutate(challanData, {
+            onSuccess: () => {
+                setFlag(false);
+            },
+        });
+    }
+
+    const selectedUserNames = userList
+        ?.filter((user: any) => selectedAssignTo.includes(user._id))
+        ?.map((user: any) => user.user_name) || [];
 
     return (
         <Box>
-            <Box
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "16px",
-                }}
-            >
-                <Typography sx={{ fontSize: 18, fontWeight: "bold", color: "#424242" }}>
-                    Challan
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                    <Button
-                        variant="contained"
-                        endIcon={<ArrowDropDownIcon />}
-                        onClick={handleClick}
+            {isFetching || usersLoading ? (
+                <Spinner />
+            ) : (
+                <>
+                    <Box
                         sx={{
-                            width: "200px",
-                            backgroundColor: "white",
-                            color: "#004D40",
-                            borderRadius: "8px",
-                            padding: "8px 16px",
-                            textTransform: "capitalize",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            height: "3.3rem",
                             display: "flex",
-                            justifyContent: "space-between",
                             alignItems: "center",
-                            "& .MuiButton-endIcon": {
-                                marginLeft: 0,
-                            },
+                            justifyContent: "space-between",
+                            marginBottom: "16px",
                         }}
                     >
-                        {selectedAssignTo
-                            ? assignOptions.find((option) => option.value === selectedAssignTo)?.label
-                            : "Assign Challan To"}
-                    </Button>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
-                        anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "right",
-                        }}
-                        transformOrigin={{
-                            vertical: "top",
-                            horizontal: "right",
-                        }}
-                    >
-                        {assignOptions.map((option) => (
-                            <MenuItem
-                                key={option.value}
-                                onClick={() => {
-                                    setSelectedAssignTo(option.value);
-                                    handleClose();
+                        <Typography sx={{ fontSize: 18, fontWeight: "bold", color: "#424242" }}>
+                            Challan
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 2 }}>
+                            <Button
+                                variant="contained"
+                                endIcon={<ArrowDropDownIcon />}
+                                onClick={handleClick}
+                                sx={{
+                                    width: "200px",
+                                    backgroundColor: "white",
+                                    color: "#004D40",
+                                    borderRadius: "8px",
+                                    padding: "8px 16px",
+                                    textTransform: "capitalize",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    height: "3.3rem",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    "& .MuiButton-endIcon": {
+                                        marginLeft: 0,
+                                    },
                                 }}
                             >
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </Menu>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            backgroundColor: Colors.primary,
-                            color: "#FFFFFF",
-                            borderRadius: "8px",
-                            padding: "8px 16px",
-                            textTransform: "capitalize",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            height: "2.5rem",
-                            "&:hover": {
-                                backgroundColor: "#004D40",
-                            },
-                        }}
-                    >
-                        Preview
-                    </Button>
-                </Box>
-            </Box>
+                                {selectedAssignTo.length > 0
+                                    ? selectedUserNames.join(", ")
+                                    : "Assign Challan To"}
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "right",
+                                }}
+                                transformOrigin={{
+                                    vertical: "top",
+                                    horizontal: "right",
+                                }}
+                                PaperProps={{
+                                    style: {
+                                        maxHeight: "200px",
+                                        width: "250px",
+                                    },
+                                }}
+                            >
+                                {userList && Array.isArray(userList) ? (
+                                    userList.map((user: any) => (
+                                        <MenuItem
+                                            key={user._id}
+                                            sx={{
+                                                width: "250px",
+                                                fontSize: "14px",
+                                                padding: "8px 16px",
+                                            }}
+                                        >
+                                            <Checkbox
+                                                checked={selectedAssignTo.includes(user._id)}
+                                                onChange={() => handleMenuItemClick(user._id)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                            <span>{user.user_name}</span>
+                                            <span style={{ fontSize: "12px", marginLeft: "4px" }}>
+                                                ({user.user_role})
+                                            </span>
+                                        </MenuItem>
+                                    ))
+                                ) : (
+                                    <MenuItem
+                                        disabled
+                                        sx={{
+                                            width: "250px",
+                                            fontSize: "14px",
+                                            padding: "8px 16px",
+                                        }}
+                                    >
+                                        No users available
+                                    </MenuItem>
+                                )}
+                            </Menu>
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: Colors.primary,
+                                    color: "#FFFFFF",
+                                    borderRadius: "8px",
+                                    padding: "8px 16px",
+                                    textTransform: "capitalize",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    height: "2.5rem",
+                                    "&:hover": {
+                                        backgroundColor: "#004D40",
+                                    },
+                                }}
+                            >
+                                Preview
+                            </Button>
+                        </Box>
+                    </Box>
 
-            <Formik
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                onSubmit={(values) => {
-                    const updatedValues = { ...values, assignTo: selectedAssignTo };
-                    console.log("Form Values:", updatedValues);
-                    setFlag(true);
-                }}
-            >
-                {({ values, errors, touched }) => (
-                    <Form>
-                        <FieldArray name="products">
-                            {({ push, remove }) => (
-                                <>
-                                    <TableContainer sx={{ bgcolor: "#FFFFFF", borderRadius: 2, mb: 3 }}>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow sx={{ bgcolor: Colors.primary }}>
-                                                    {["Sr. No.", "Scan Id", "Products", "Qty.", "Unit", "Action"].map((header) => (
-                                                        <TableCell
-                                                            key={header}
-                                                            sx={{
-                                                                color: "#FFFFFF",
-                                                                fontSize: "14px",
-                                                                textTransform: "capitalize",
-                                                                fontWeight: "bold",
-                                                                padding: "12px",
-                                                            }}
-                                                        >
-                                                            {header}
-                                                        </TableCell>
-                                                    ))}
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {values.products.map((product, index) => (
-                                                    <TableRow key={index}>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}].srNo`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={validationSchema}
+                    // onSubmit={(values) => {
+                    //     const updatedValues = { ...values, assign_to: selectedAssignTo };
+                    //     console.log(updatedValues);
+
+                    //     mutate({
+                    //         challanData: updatedValues
+                    //     })
+                    // }}
+                    >
+                        {({ values, errors, touched }) => (
+                            <Form>
+                                <FieldArray name="products">
+                                    {({ push, remove }) => (
+                                        <>
+                                            <TableContainer sx={{ bgcolor: "#FFFFFF", borderRadius: 2, mb: 3 }}>
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow sx={{ bgcolor: Colors.primary }}>
+                                                            {["Sr. No.", "Scan Id", "Products", "Qty.", "Unit", "Action"].map((header) => (
+                                                                <TableCell
+                                                                    key={header}
+                                                                    sx={{
+                                                                        color: "#FFFFFF",
                                                                         fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
-                                                                }}
-                                                                error={
-                                                                    touched.products?.[index]?.srNo && !!errors.products?.[index]?.srNo
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?.srNo && errors.products?.[index]?.srNo ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].srNo}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}].scanId`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
-                                                                }}
-                                                                error={
-                                                                    touched.products?.[index]?.scanId && !!errors.products?.[index]?.scanId
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?.scanId && errors.products?.[index]?.scanId ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].scanId}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}].products`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
-                                                                }}
-                                                                error={
-                                                                    touched.products?.[index]?.products &&
-                                                                    !!errors.products?.[index]?.products
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?.products &&
-                                                                        errors.products?.[index]?.products ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].products}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}].quantity`}
-                                                                type="number"
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
-                                                                }}
-                                                                error={
-                                                                    touched.products?.[index]?.quantity &&
-                                                                    !!errors.products?.[index]?.quantity
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?.quantity &&
-                                                                        errors.products?.[index]?.quantity ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].quantity}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}].unit`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
-                                                                }}
-                                                                error={
-                                                                    touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].unit}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <IconButton
-                                                                onClick={() => remove(index)}
-                                                                sx={{
-                                                                    backgroundColor: "#FF0000",
-                                                                    color: "#FFFFFF",
-                                                                    "&:hover": {
-                                                                        backgroundColor: "#CC0000",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                                <TableRow>
-                                                    <TableCell colSpan={7} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
-                                                        <IconButton
-                                                            onClick={() =>
-                                                                push({
-                                                                    srNo: `#${(values.products.length + 1).toString().padStart(4, "0")}`,
-                                                                    scanId: "",
-                                                                    products: "",
-                                                                    quantity: "",
-                                                                    unit: "",
-                                                                })
-                                                            }
-                                                            sx={{
-                                                                backgroundColor: "#2196F3",
-                                                                color: "#FFFFFF",
-                                                                "&:hover": {
-                                                                    backgroundColor: "#1976D2",
-                                                                },
-                                                            }}
-                                                        >
-                                                            <AddIcon />
-                                                        </IconButton>
-                                                    </TableCell>
-                                                </TableRow>
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                    <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-                                        <Button
-                                            type="submit"
-                                            variant="contained"
-                                            sx={{
-                                                backgroundColor: Colors.primary,
-                                                color: "#FFFFFF",
-                                                borderRadius: "8px",
-                                                padding: "8px 24px",
-                                                textTransform: "capitalize",
-                                                fontSize: "14px",
-                                                fontWeight: "bold",
-                                                "&:hover": {
-                                                    backgroundColor: "#004D40",
-                                                },
-                                            }}
-                                        >
-                                            Save
-                                        </Button>
-                                        <Button
-                                            onClick={() => setFlag(true)}
-                                            variant="contained"
-                                            sx={{
-                                                backgroundColor: "#E0E0E0",
-                                                color: "#424242",
-                                                borderRadius: "8px",
-                                                padding: "8px 24px",
-                                                textTransform: "capitalize",
-                                                fontSize: "14px",
-                                                fontWeight: "bold",
-                                                "&:hover": {
-                                                    backgroundColor: "#B0BEC5",
-                                                },
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </Box>
-                                </>
-                            )}
-                        </FieldArray>
-                    </Form>
-                )}
-            </Formik>
+                                                                        textTransform: "capitalize",
+                                                                        fontWeight: "bold",
+                                                                        padding: "12px",
+                                                                    }}
+                                                                >
+                                                                    {header}
+                                                                </TableCell>
+                                                            ))}
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {values.products.map((product, index) => (
+                                                            <TableRow key={index}>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}]._id`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?._id && !!errors.products?.[index]?._id
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?._id && errors.products?.[index]?._id ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index]._id}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].scanId`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.scanId && !!errors.products?.[index]?.scanId
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.scanId && errors.products?.[index]?.scanId ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].scanId}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].product_name`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.product_name &&
+                                                                            !!errors.products?.[index]?.product_name
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.product_name &&
+                                                                                errors.products?.[index]?.product_name ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].product_name}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].quantity`}
+                                                                        type="number"
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.quantity &&
+                                                                            !!errors.products?.[index]?.quantity
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.quantity &&
+                                                                                errors.products?.[index]?.quantity ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].quantity}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].unit`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].unit}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <IconButton
+                                                                        onClick={() => remove(index)}
+                                                                        sx={{
+                                                                            backgroundColor: "#FF0000",
+                                                                            color: "#FFFFFF",
+                                                                            "&:hover": {
+                                                                                backgroundColor: "#CC0000",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <DeleteIcon />
+                                                                    </IconButton>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                        <TableRow>
+                                                            <TableCell colSpan={7} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        push({
+                                                                            _id: `#${(values.products.length + 1).toString().padStart(4, "0")}`,
+                                                                            scanId: "",
+                                                                            product_name: "",
+                                                                            quantity: "",
+                                                                            unit: "",
+                                                                        })
+                                                                    }
+                                                                    sx={{
+                                                                        backgroundColor: "#2196F3",
+                                                                        color: "#FFFFFF",
+                                                                        "&:hover": {
+                                                                            backgroundColor: "#1976D2",
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    <AddIcon />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+                                                <Button
+                                                    onClick={() => { handleSubmit(values) }}
+                                                    variant="contained"
+                                                    sx={{
+                                                        backgroundColor: Colors.primary,
+                                                        color: "#FFFFFF",
+                                                        borderRadius: "8px",
+                                                        padding: "8px 24px",
+                                                        textTransform: "capitalize",
+                                                        fontSize: "14px",
+                                                        fontWeight: "bold",
+                                                        "&:hover": {
+                                                            backgroundColor: "#004D40",
+                                                        },
+                                                    }}
+                                                >
+                                                    Save
+                                                </Button>
+                                                <Button
+                                                    onClick={() => setFlag(true)}
+                                                    variant="contained"
+                                                    sx={{
+                                                        backgroundColor: "#E0E0E0",
+                                                        color: "#424242",
+                                                        borderRadius: "8px",
+                                                        padding: "8px 24px",
+                                                        textTransform: "capitalize",
+                                                        fontSize: "14px",
+                                                        fontWeight: "bold",
+                                                        "&:hover": {
+                                                            backgroundColor: "#B0BEC5",
+                                                        },
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </Box>
+                                        </>
+                                    )}
+                                </FieldArray>
+                            </Form>
+                        )}
+                    </Formik>
+                </>
+            )}
         </Box>
     );
 };

@@ -174,7 +174,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag, enquiryId }) => {
                                         </TableCell>
                                         <TableCell align="center">{displayShortId(quotation._id)}</TableCell>
                                         <TableCell align="center">{convertDateToString(quotation.createdAt)}</TableCell>
-                                        <TableCell align="center">{convertDateToString(quotation.enquiry_id.date)}</TableCell>
+                                        <TableCell align="center">{quotation.enquiry_id.date}</TableCell>
                                         <TableCell align="center">{quotation.net_amount}</TableCell>
                                         <TableCell align="center">
                                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>

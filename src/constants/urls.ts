@@ -16,6 +16,9 @@ export const CREATE_ORDER = "api/order/addOrder";
 export const GET_ORDERS_BY_ENQUIRY_ID = (enquiryId: string) =>
   `api/order/getOrderByEnquiry/${enquiryId}`;
 
+//Challan urls
+export const CREATE_CHALLAN = "api/challan/add";
+
 // Utilities urls
 export const GET_ALL_CLIENTS = "api/client/get";
 export const GET_ALL_SALESMAN = "api/user/salesman";

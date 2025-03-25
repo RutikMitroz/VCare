@@ -121,7 +121,7 @@ const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
                             {orderDetails?.quotation_id?.products?.length > 0 ? (
                                 orderDetails?.quotation_id?.products?.map((product: any, index: number) => (
                                     <TableRow
-                                        key={product?._id?._id}
+                                        key={product?._id}
                                         sx={{
                                             backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
                                             "&:hover": {
@@ -135,13 +135,13 @@ const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
                                             },
                                         }}
                                     >
-                                        <TableCell align="center">{displayShortId(product?._id?._id)}</TableCell>
-                                        <TableCell align="center">{product?._id?.product_name}</TableCell>
-                                        <TableCell align="center">{product?._id?.qty}</TableCell>
-                                        <TableCell align="center">{product?._id?.HSN_code
+                                        <TableCell align="center">{displayShortId(product?._id)}</TableCell>
+                                        <TableCell align="center">{product?.product_name}</TableCell>
+                                        <TableCell align="center">{product?.qty}</TableCell>
+                                        <TableCell align="center">{product?.HSN_code
                                         }</TableCell>
-                                        <TableCell align="center">{product?._id?.unit}</TableCell>
-                                        <TableCell align="center">{product?._id?.product_price
+                                        <TableCell align="center">{product?.unit}</TableCell>
+                                        <TableCell align="center">{product?.product_price
                                         }</TableCell>
                                     </TableRow>
                                 ))
