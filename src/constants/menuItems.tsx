@@ -6,7 +6,7 @@ import {
   Report as ComplaintsIcon,
   Inventory as InventoryIcon,
   SupervisorAccount as MastersIcon,
-  People as UserManagementIcon,
+  // People as UserManagementIcon,
   Payment as PaymentsIcon,
   Category as ProductIcon,
   Person as ClientIcon,
@@ -46,6 +46,6 @@ export const menuItems: MenuItem[] = [
       { text: 'Supplier', path: '/masters/supplier', icon: <SupplierIcon sx={{ fontSize: '18px' }} /> },
     ]
   },
-  { text: 'User Management', path: '/users', icon: <UserManagementIcon sx={{ fontSize: '18px' }} /> },
+  // { text: 'User Management', path: '/users', icon: <UserManagementIcon sx={{ fontSize: '18px' }} /> },
   { text: 'Payments', path: '/payments', icon: <PaymentsIcon sx={{ fontSize: '18px' }} /> },
 ]; 

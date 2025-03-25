@@ -1,28 +1,12 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody } from "@mui/material";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, } from "@mui/material";
+import CustomMenuList from "../../utilities/CustomMenuList";
 import { displayShortId } from "../../../utils/displayShortId";
 import { useNavigate } from "react-router-dom";
 import { Colors } from "../../../constants/Colors";
 
-interface Order {
-    _id: string;
-    quotation_id: {
-        _id: string;
-        clientId: {
-            client_name: string;
-            client_phone: string;
-        };
-        enquiry_id:string;
-        product_name: string;
-        total_amount: number;
-    };
-    createdAt: string;
-    order_status: string;
-    estimate_required_time: string;
-}
-
 interface DataTableProps {
-    appointments: Order[];
+    enquiries: any[];
     page: number;
     rowsPerPage: number;
     totalNoOfDocs: number;
@@ -34,13 +18,19 @@ interface DataTableProps {
 }
 
 const DataTable = ({
-    appointments,
+    enquiries,
     page,
     rowsPerPage,
     totalNoOfDocs,
     handleChangePage,
     handleChangeRowsPerPage,
 }: DataTableProps) => {
+    const menuDataRef = React.useRef<any | null>(null);
+    const [openMenu, setOpenMenu] = React.useState(false);
+    const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
+        null
+    );
+
     const navigate = useNavigate();
 
     const headerCellStyle = {
@@ -54,19 +44,6 @@ const DataTable = ({
         top: 0,
         zIndex: 1,
     } as const;
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "In Progress":
-                return "#459CFF";
-            case "Pending":
-                return "#FF0000";
-            case "Completed":
-                return "#60CA72";
-            default:
-                return "#F44336";
-        }
-    };
 
     return (
         <>
@@ -90,25 +67,22 @@ const DataTable = ({
                                         borderTopLeftRadius: "12px",
                                     }}
                                 >
-                                    Order ID
+                                    Enquiry ID
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Date
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Customer Name
+                                    Client Name
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Phone
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Product
+                                    Assigned To
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Total Amount
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
-                                    Assigned Technician
+                                    Enquiry For
                                 </TableCell>
                                 <TableCell align="center" sx={{
                                     ...headerCellStyle,
@@ -119,10 +93,10 @@ const DataTable = ({
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {appointments.map((order, index) => (
+                            {enquiries.map((enquiry, index) => (
                                 <TableRow
-                                    onClick={() => navigate(`/enquiry/${order.quotation_id?.enquiry_id}`)}
-                                    key={order._id}
+                                    onClick={() => navigate(`/enquiry/${enquiry._id}`)}
+                                    key={enquiry._id}
                                     sx={{
                                         cursor: "pointer",
                                         backgroundColor:
@@ -138,38 +112,30 @@ const DataTable = ({
                                         },
                                     }}
                                 >
-                                    <TableCell align="center">{displayShortId(order._id)}</TableCell>
+                                    <TableCell align="center">{displayShortId(enquiry._id)}</TableCell>
+                                    <TableCell align="center">{enquiry?.date}</TableCell>
+                                    <TableCell align="center">{enquiry.client_id.client_name}</TableCell>
+                                    <TableCell align="center">{enquiry.client_id.client_phone}</TableCell>
+                                    <TableCell align="center">{enquiry.assign_to.user_name}</TableCell>
+                                    <TableCell align="center">{enquiry.enquiry_for}</TableCell>
                                     <TableCell align="center">
-                                        {new Date(order.createdAt).toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        {order.quotation_id?.clientId?.client_name}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        {order.quotation_id?.clientId?.client_phone}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        {order.quotation_id?.product_name}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        ₹{order.quotation_id?.total_amount}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        Jack Reacher
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <span
-                                            style={{
-                                                color: getStatusColor(order.order_status),
-                                                fontWeight: "500",
-                                                fontSize: "14px",
+                                        <Chip
+                                            label={enquiry.status}
+                                            sx={{
+                                                backgroundColor:
+                                                    enquiry.status === "QUOTATION SENT"
+                                                        ? "#4CAF50"
+                                                        : "#F44336",
+                                                color: "#FFFFFF",
+                                                fontWeight: "bold",
+                                                fontSize: "12px",
+                                                height: "24px",
                                             }}
-                                        >
-                                            {order.order_status}
-                                        </span>
+                                        />
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ))
+                            }
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -189,6 +155,22 @@ const DataTable = ({
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Box>
+
+            {menuAnchorEl && openMenu && menuDataRef.current && (
+                <CustomMenuList
+                    open={openMenu}
+                    setOpenMenu={setOpenMenu}
+                    menuAnchorEl={menuAnchorEl}
+                    setMenuAnchorEl={setMenuAnchorEl}
+                    menuItems={[
+                        {
+                            title: "More details",
+                            iconImage: "/assets/icons/more_details.png",
+                            // fn: () => navigate(`/enquiries/${menuDataRef.current?._id ?? ""}`),
+                        },
+                    ]}
+                />
+            )}
         </>
     );
 };
