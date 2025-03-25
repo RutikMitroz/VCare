@@ -9,22 +9,26 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useState } from "react";
 import { Colors } from "../../../../constants/Colors";
+import { useGetOrderByEnquiryId } from "../../../../hooks/enquiry/useGetOrderByEnquiry";
 
-interface Challan {
-    srNo: string;
-    scanId: string;
-    products: string;
-    quantity: string;
-    unit: string;
-}
+// interface Challan {
+//     srNo: string;
+//     scanId: string;
+//     products: string;
+//     quantity: string;
+//     unit: string;
+// }
 
 interface FormValues {
-    products: Challan[];
-    assignTo: string;
+    products: any[];
+    assign_to: any[];
+    order_id: string;
+    enquiry_id: string;
 }
 
 interface CreateChallanFormProps {
     setFlag: (isCreating: boolean) => void;
+    enquiryDetails: any;
 }
 
 const validationSchema = Yup.object({
@@ -44,18 +48,26 @@ const validationSchema = Yup.object({
     assignTo: Yup.string().required("Please select an option to assign the challan"),
 });
 
-const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
+const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryDetails }) => {
+
+    console.log("enquiryDetails :", enquiryDetails._id);
+    
+
+    const { data } = useGetOrderByEnquiryId(enquiryDetails?._id);
+
+
+    console.log("products1 :",data);
+    console.log("products2:",data?.data);
+    console.log("products3 :",data?.data?.quotation_id);
+    console.log("products4 :",data?.data?.quotation_id?.products);
+
+
+
     const initialValues: FormValues = {
-        products: [
-            {
-                srNo: "#0001",
-                scanId: "25n2025",
-                products: "Hikvision 5MP CCTV Camera",
-                quantity: "6",
-                unit: "NOS",
-            },
-        ],
-        assignTo: "",
+        products: data?.data?.quotation_id?.products,
+        enquiry_id: enquiryDetails?._id,
+        order_id: data?.data?._id,
+        assign_to: [],
     };
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -133,7 +145,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                             <MenuItem
                                 key={option.value}
                                 onClick={() => {
-                                    setSelectedAssignTo(option.value); 
+                                    setSelectedAssignTo(option.value);
                                     handleClose();
                                 }}
                             >

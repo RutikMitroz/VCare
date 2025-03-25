@@ -6,7 +6,6 @@ export const ADD_ENQUIRY = "api/enquiry/addEnquiry";
 export const UPDATE_ENQUIRY = (enquiryId: string) =>
   `api/enquiry/updateEnquiry/${enquiryId}`;
 
-
 //Quotations urls
 export const CREATE_QUOTATION = "api/quotation/create";
 export const GET_QUOTATIONS_BY_ENQUIRY_ID = (enquiryId: string) =>
@@ -31,3 +30,4 @@ export const ADD_CLIENT = "api/client/add";
 
 // user urls
 export const ADD_USER = "api/user/add";
+export const GET_ALL_USERS = "api/user/get";
