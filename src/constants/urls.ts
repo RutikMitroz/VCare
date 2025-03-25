@@ -31,3 +31,7 @@ export const ADD_CLIENT = "api/client/add";
 // user urls
 export const ADD_USER = "api/user/add";
 export const GET_ALL_USERS = "api/user/get";
+
+
+// order urls
+export const GET_ALL_ORDERS = "api/order/getOrder";

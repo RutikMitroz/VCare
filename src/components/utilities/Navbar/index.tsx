@@ -33,7 +33,7 @@ const Navbar = () => {
     if (masterSubItem) {
       return 'Masters';
     }
-    const currentItem = menuItems.find(item => item.path === currentPath);
+    const currentItem = menuItems.find(item => currentPath.includes(item.path));
     return currentItem ? currentItem.text : 'Dashboard';
   };
 
