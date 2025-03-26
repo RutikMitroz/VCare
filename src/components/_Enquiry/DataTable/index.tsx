@@ -93,7 +93,7 @@ const DataTable = ({
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {enquiries.map((enquiry, index) => (
+                            {enquiries.length > 0 ? (enquiries.map((enquiry, index) => (
                                 <TableRow
                                     onClick={() => navigate(`/enquiry/${enquiry._id}`)}
                                     key={enquiry._id}
@@ -135,7 +135,14 @@ const DataTable = ({
                                     </TableCell>
                                 </TableRow>
                             ))
-                            }
+
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center">
+                                        No Enquiries available
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>

@@ -64,7 +64,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                 product_name: "",
                 unit: "",
                 product_price: "",
-                quantity: 1, // Default quantity is 1
+                quantity: 1,
             },
         ],
         discountPercent: 0,
@@ -72,7 +72,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
 
     const queryClient = useQueryClient();
 
-    const [searchStates, setSearchStates] = useState<string[]>([""]); // Default empty search for first product
+    const [searchStates, setSearchStates] = useState<string[]>([""]);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
 
     const updateSearchState = (index: number, value: string) => {
@@ -85,7 +85,14 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
 
     const { mutate } = useAddQuotation();
 
-    const { data: productsData, isLoading } = useGetProducts("");
+    const { data: ps, isLoading } = useGetProducts({
+        page: 0,
+        limit: 0,
+        search: "",
+    });
+
+    const productsData = ps?.data;
+
     useEffect(() => {
         if (productsData) {
             setAllProducts(productsData);
@@ -99,11 +106,11 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
     const calculateTotals = (products: Product[], discountPercent: number | "") => {
         const totalAmount = products.reduce((sum, product) => {
             const product_price = Number(product.product_price) || 0;
-            const quantity = Number(product.quantity) || 1; // Default to 1 if invalid
-            return sum + product_price * quantity; // Multiply price by quantity
+            const quantity = Number(product.quantity) || 1;
+            return sum + product_price * quantity;
         }, 0);
 
-        const taxableAmount = 0; // Adjust if you add tax logic later
+        const taxableAmount = 0;
 
         const discountAmount =
             ((totalAmount + taxableAmount) * (Number(discountPercent) || 0)) / 100;

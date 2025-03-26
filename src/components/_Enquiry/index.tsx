@@ -127,16 +127,15 @@ const RenderEnquiry = () => {
           </Button>
         </Box>
         {isError ? <MessageBox message="Something went wrong" />
-          : isFetching ? <Spinner />
-            : data?.data?.length === 0 ? <MessageBox message="No Enquiries Found" /> :
-              <DataTable
-                enquiries={data?.data}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                totalNoOfDocs={data?.summary?.totalEnquiries}
-                handleChangePage={handleChangePage}
-                handleChangeRowsPerPage={handleChangeRowsPerPage}
-              />
+          : isFetching ? <Spinner /> :
+            <DataTable
+              enquiries={data?.data}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              totalNoOfDocs={data?.summary?.totalEnquiries}
+              handleChangePage={handleChangePage}
+              handleChangeRowsPerPage={handleChangeRowsPerPage}
+            />
         }
       </Box>
       <AddEnquiryModal open={open} onClose={handleClose} />

@@ -25,16 +25,18 @@ export const GET_ALL_SALESMAN = "api/user/salesman";
 
 //Products urls
 export const GET_ALL_PRODUCTS = "api/product/product-list";
-// export const GET_ALL_SALESMAN = "api/user/salesman";
+export const GET_PRODUCT_BY_PRODUCT_BARCODE = (product_barcode: string) =>
+  `api/inventory/ByBarcode/${product_barcode}`;
 
 // client urls
 export const ADD_CLIENT = "api/client/add";
-// export const GET_ALL_CLIENTS = "api/client/get";
 
 // user urls
 export const ADD_USER = "api/user/add";
 export const GET_ALL_USERS = "api/user/get";
 
-
 // order urls
 export const GET_ALL_ORDERS = "api/order/getOrder";
+
+//inventory urls
+export const ADD_GRN = "api/inventory/addInventory";

@@ -13,9 +13,10 @@ import { useQueryClient } from "@tanstack/react-query";
 interface DataTableProps {
     setFlag: (isCreating: boolean) => void;
     enquiryId: string;
+    currentStatus: string;
 }
 
-const DataTable: React.FC<DataTableProps> = ({ setFlag, enquiryId }) => {
+const DataTable: React.FC<DataTableProps> = ({ setFlag, enquiryId, currentStatus }) => {
     const queryClient = useQueryClient();
     const { data } = useGetQuotationsByEnquiryId(enquiryId);
     const { mutate: createOrder } = useCreateOrder();
@@ -78,6 +79,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag, enquiryId }) => {
                 <Button
                     onClick={() => setFlag(true)}
                     variant="contained"
+                    disabled={currentStatus !== "not_contacted"}
                     sx={{
                         backgroundColor: "#1D434C",
                         color: "#FFFFFF",
@@ -227,7 +229,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag, enquiryId }) => {
                 <Button
                     variant="contained"
                     onClick={handleConvertToOrder}
-                    disabled={!selectedQuotationId}
+                    disabled={!selectedQuotationId || currentStatus !== "not_contacted"}
                     sx={{
                         backgroundColor: selectedQuotationId ? Colors.primary : "#B0BEC5",
                         color: "#FFFFFF",
