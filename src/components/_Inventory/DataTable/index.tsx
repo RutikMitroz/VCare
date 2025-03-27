@@ -1,12 +1,12 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, } from "@mui/material";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, IconButton } from "@mui/material";
 import CustomMenuList from "../../utilities/CustomMenuList";
 import { displayShortId } from "../../../utils/displayShortId";
-import { useNavigate } from "react-router-dom";
 import { Colors } from "../../../constants/Colors";
+import EditIcon from '@mui/icons-material/Edit';
 
 interface DataTableProps {
-    enquiries: any[];
+    products: any[];
     page: number;
     rowsPerPage: number;
     totalNoOfDocs: number;
@@ -18,7 +18,7 @@ interface DataTableProps {
 }
 
 const DataTable = ({
-    enquiries,
+    products,
     page,
     rowsPerPage,
     totalNoOfDocs,
@@ -30,8 +30,6 @@ const DataTable = ({
     const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
         null
     );
-
-    const navigate = useNavigate();
 
     const headerCellStyle = {
         backgroundColor: Colors.primary,
@@ -67,38 +65,30 @@ const DataTable = ({
                                         borderTopLeftRadius: "12px",
                                     }}
                                 >
-                                    Enquiry ID
+                                    Product ID
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Date
+                                    Product Name
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Client Name
+                                    Product Category
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Phone
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
-                                    Assigned To
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
-                                    Enquiry For
+                                    Available Product
                                 </TableCell>
                                 <TableCell align="center" sx={{
                                     ...headerCellStyle,
                                     borderTopRightRadius: "12px",
                                 }}>
-                                    Status
+                                    Action
                                 </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {enquiries.map((enquiry, index) => (
+                            {products.length > 0 ? (products.map((product, index) => (
                                 <TableRow
-                                    onClick={() => navigate(`/enquiry/${enquiry._id}`)}
-                                    key={enquiry._id}
+                                    key={product._id}
                                     sx={{
-                                        cursor: "pointer",
                                         backgroundColor:
                                             index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
                                         "&:hover": {
@@ -112,30 +102,34 @@ const DataTable = ({
                                         },
                                     }}
                                 >
-                                    <TableCell align="center">{displayShortId(enquiry._id)}</TableCell>
-                                    <TableCell align="center">{enquiry?.date}</TableCell>
-                                    <TableCell align="center">{enquiry.client_id.client_name}</TableCell>
-                                    <TableCell align="center">{enquiry.client_id.client_phone}</TableCell>
-                                    <TableCell align="center">{enquiry.assign_to.user_name}</TableCell>
-                                    <TableCell align="center">{enquiry.enquiry_for}</TableCell>
+                                    <TableCell align="center">{displayShortId(product._id)}</TableCell>
+                                    <TableCell align="center">{product?.product_name}</TableCell>
+                                    <TableCell align="center">{product?.product_category}</TableCell>
+                                    <TableCell align="center">{product?.quantity}</TableCell>
                                     <TableCell align="center">
-                                        <Chip
-                                            label={enquiry.status}
-                                            sx={{
-                                                backgroundColor:
-                                                    enquiry.status === "QUOTATION SENT"
-                                                        ? "#4CAF50"
-                                                        : "#F44336",
-                                                color: "#FFFFFF",
-                                                fontWeight: "bold",
-                                                fontSize: "12px",
-                                                height: "24px",
-                                            }}
-                                        />
+                                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                                            <IconButton
+                                                sx={{
+                                                    color: "#424242",
+                                                    "&:hover": {
+                                                        color: Colors.primary,
+                                                    },
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
                                     </TableCell>
                                 </TableRow>
                             ))
-                            }
+
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center">
+                                        No products available
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -166,7 +160,7 @@ const DataTable = ({
                         {
                             title: "More details",
                             iconImage: "/assets/icons/more_details.png",
-                            // fn: () => navigate(`/enquiries/${menuDataRef.current?._id ?? ""}`),
+                            // fn: () => navigate(`/products/${menuDataRef.current?._id ?? ""}`),
                         },
                     ]}
                 />

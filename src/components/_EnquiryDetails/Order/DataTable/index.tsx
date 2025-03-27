@@ -9,9 +9,10 @@ import { useQueryClient } from "@tanstack/react-query";
 interface DataTableProps {
     orderDetails: any;
     enquiryId: string;
+    currentStatus: string;
 }
 
-const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
+const DataTable = ({ orderDetails, enquiryId, currentStatus }: DataTableProps) => {
 
     const { mutate } = useUpdateEnquiry();
     const queryClient = useQueryClient();
@@ -42,6 +43,7 @@ const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
                     <OrderIdAndDateCard label="Order Date" value={convertDateToString(orderDetails?.createdAt)} />
                 </Box>
                 <Button
+                    disabled={currentStatus !== "quotation_created"}
                     onClick={() => {
                         mutate({
                             enquiryId: enquiryId,
@@ -100,19 +102,19 @@ const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
                                     Product Name
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Qty.
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
-                                    HSN No.
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
                                     Unit
+                                </TableCell>
+                                <TableCell align="center" sx={headerCellStyle}>
+                                    Rate
+                                </TableCell>
+                                <TableCell align="center" sx={headerCellStyle}>
+                                    Quantity
                                 </TableCell>
                                 <TableCell align="center" sx={{
                                     ...headerCellStyle,
                                     borderTopRightRadius: "12px",
                                 }}>
-                                    Rate
+                                    Total Amount
                                 </TableCell>
 
                             </TableRow>
@@ -121,7 +123,7 @@ const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
                             {orderDetails?.quotation_id?.products?.length > 0 ? (
                                 orderDetails?.quotation_id?.products?.map((product: any, index: number) => (
                                     <TableRow
-                                        key={product?._id?._id}
+                                        key={product?._id}
                                         sx={{
                                             backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
                                             "&:hover": {
@@ -135,14 +137,13 @@ const DataTable = ({ orderDetails, enquiryId }: DataTableProps) => {
                                             },
                                         }}
                                     >
-                                        <TableCell align="center">{displayShortId(product?._id?._id)}</TableCell>
-                                        <TableCell align="center">{product?._id?.product_name}</TableCell>
-                                        <TableCell align="center">{product?._id?.qty}</TableCell>
-                                        <TableCell align="center">{product?._id?.HSN_code
+                                        <TableCell align="center">{displayShortId(product?.product_id)}</TableCell>
+                                        <TableCell align="center">{product?.product_name}</TableCell>
+                                        <TableCell align="center">{product?.unit}</TableCell>
+                                        <TableCell align="center">{product?.product_price
                                         }</TableCell>
-                                        <TableCell align="center">{product?._id?.unit}</TableCell>
-                                        <TableCell align="center">{product?._id?.product_price
-                                        }</TableCell>
+                                        <TableCell align="center">{product?.quantity}</TableCell>
+                                        <TableCell align="center">{product?.total_amount}</TableCell>
                                     </TableRow>
                                 ))
                             ) : (

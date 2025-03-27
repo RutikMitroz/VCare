@@ -10,7 +10,7 @@ const Quaotation = ({ enquiryDetails }: QuotationProps) => {
     const [flag, setFlag] = useState(false);
     return (
         flag ? <CreateQuotationForm setFlag={setFlag} enquiryId={enquiryDetails?._id} clientId={enquiryDetails?.client_id?._id} /> :
-            <DataTable setFlag={setFlag}  enquiryId={enquiryDetails?._id}/>
+            <DataTable setFlag={setFlag} enquiryId={enquiryDetails?._id} currentStatus={enquiryDetails?.status} />
     )
 }
 

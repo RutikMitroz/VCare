@@ -2,38 +2,44 @@ import { Formik, Form, Field, FieldArray } from "formik";
 import * as Yup from "yup";
 import {
     Box, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead,
-    TableRow, IconButton, Menu, MenuItem,
+    TableRow, IconButton, Menu, MenuItem, Checkbox,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useState } from "react";
 import { Colors } from "../../../../constants/Colors";
+import { useGetOrderByEnquiryId } from "../../../../hooks/enquiry/useGetOrderByEnquiry";
+import Spinner from "../../../utilities/Spinner";
+import { useGetAllUsers } from "../../../../hooks/enquiry/useGetAllUsers";
+import { useAddChallan } from "../../../../hooks/enquiry/useAddChallan";
 
-interface Challan {
-    srNo: string;
-    scanId: string;
-    products: string;
+interface Product {
+    _id: string;
+    product_barcode: string;
+    product_name: string;
     quantity: string;
     unit: string;
 }
 
 interface FormValues {
-    products: Challan[];
-    assignTo: string;
+    products: Product[];
+    order_id: string;
+    enquiry_id: string;
 }
 
 interface CreateChallanFormProps {
     setFlag: (isCreating: boolean) => void;
+    enquiryDetails: any;
 }
 
 const validationSchema = Yup.object({
     products: Yup.array()
         .of(
             Yup.object({
-                srNo: Yup.string().required("Sr. No. is required"),
-                scanId: Yup.string().required("Scan ID is required"),
-                products: Yup.string().required("Product is required"),
+                _id: Yup.string().required("Product Id is required"),
+                product_barcode: Yup.string().required("Bar Code is required"),
+                product_name: Yup.string().required("Product is required"),
                 quantity: Yup.number()
                     .required("Quantity is required")
                     .min(1, "Quantity must be at least 1"),
@@ -41,25 +47,22 @@ const validationSchema = Yup.object({
             })
         )
         .min(1, "At least one product is required"),
-    assignTo: Yup.string().required("Please select an option to assign the challan"),
 });
 
-const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
+const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryDetails }) => {
+    const { data } = useGetOrderByEnquiryId(enquiryDetails?._id);
+    const { data: userList } = useGetAllUsers();
+    const { mutate } = useAddChallan();
+
     const initialValues: FormValues = {
-        products: [
-            {
-                srNo: "#0001",
-                scanId: "25n2025",
-                products: "Hikvision 5MP CCTV Camera",
-                quantity: "6",
-                unit: "NOS",
-            },
-        ],
-        assignTo: "",
+        products: [],
+        // products: data?.data?.quotation_id?.products || [],
+        enquiry_id: enquiryDetails?._id,
+        order_id: data?.data?._id,
     };
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedAssignTo, setSelectedAssignTo] = useState<string>("");
+    const [selectedAssignTo, setSelectedAssignTo] = useState<string[]>([]);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -70,11 +73,32 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
         setAnchorEl(null);
     };
 
-    const assignOptions = [
-        { value: "teamA", label: "Team A" },
-        { value: "teamB", label: "Team B" },
-        { value: "teamC", label: "Team C" },
-    ];
+    const handleMenuItemClick = (userId: string) => {
+        setSelectedAssignTo((prev) =>
+            prev.includes(userId)
+                ? prev.filter((id) => id !== userId)
+                : [...prev, userId]
+        );
+    };
+
+    const handleSubmit = (values: FormValues) => {
+        const productList = values?.products?.map((product) => product?._id);
+        const challanData = {
+            enquiry_id: values?.enquiry_id,
+            order_id: values?.order_id,
+            products: productList,
+            assign_to: selectedAssignTo,
+        };
+        mutate(challanData, {
+            onSuccess: () => {
+                setFlag(false);
+            },
+        });
+    }
+
+    const selectedUserNames = userList
+        ?.filter((user: any) => selectedAssignTo.includes(user._id))
+        ?.map((user: any) => user.user_name) || [];
 
     return (
         <Box>
@@ -112,8 +136,8 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                             },
                         }}
                     >
-                        {selectedAssignTo
-                            ? assignOptions.find((option) => option.value === selectedAssignTo)?.label
+                        {selectedAssignTo.length > 0
+                            ? selectedUserNames.join(", ")
                             : "Assign Challan To"}
                     </Button>
                     <Menu
@@ -128,18 +152,46 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                             vertical: "top",
                             horizontal: "right",
                         }}
+                        PaperProps={{
+                            style: {
+                                maxHeight: "200px",
+                                width: "250px",
+                            },
+                        }}
                     >
-                        {assignOptions.map((option) => (
+                        {userList && Array.isArray(userList) ? (
+                            userList.map((user: any) => (
+                                <MenuItem
+                                    key={user._id}
+                                    sx={{
+                                        width: "250px",
+                                        fontSize: "14px",
+                                        padding: "8px 16px",
+                                    }}
+                                >
+                                    <Checkbox
+                                        checked={selectedAssignTo.includes(user._id)}
+                                        onChange={() => handleMenuItemClick(user._id)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <span>{user.user_name}</span>
+                                    <span style={{ fontSize: "12px", marginLeft: "4px" }}>
+                                        ({user.user_role})
+                                    </span>
+                                </MenuItem>
+                            ))
+                        ) : (
                             <MenuItem
-                                key={option.value}
-                                onClick={() => {
-                                    setSelectedAssignTo(option.value); 
-                                    handleClose();
+                                disabled
+                                sx={{
+                                    width: "250px",
+                                    fontSize: "14px",
+                                    padding: "8px 16px",
                                 }}
                             >
-                                {option.label}
+                                No users available
                             </MenuItem>
-                        ))}
+                        )}
                     </Menu>
                     <Button
                         variant="contained"
@@ -166,9 +218,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={(values) => {
-                    const updatedValues = { ...values, assignTo: selectedAssignTo };
-                    console.log("Form Values:", updatedValues);
-                    setFlag(true);
+                    console.log(values);
                 }}
             >
                 {({ values, errors, touched }) => (
@@ -180,7 +230,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                         <Table>
                                             <TableHead>
                                                 <TableRow sx={{ bgcolor: Colors.primary }}>
-                                                    {["Sr. No.", "Scan Id", "Products", "Qty.", "Unit", "Action"].map((header) => (
+                                                    {["BarCode", "Product Id", "Product Name", "Qty.", "Unit", "Action"].map((header) => (
                                                         <TableCell
                                                             key={header}
                                                             sx={{
@@ -202,7 +252,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                         <TableCell sx={{ padding: "8px" }}>
                                                             <Field
                                                                 as={TextField}
-                                                                name={`products[${index}].srNo`}
+                                                                name={`products[${index}].product_barcode`}
                                                                 size="small"
                                                                 variant="outlined"
                                                                 fullWidth
@@ -213,12 +263,12 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                                     },
                                                                 }}
                                                                 error={
-                                                                    touched.products?.[index]?.srNo && !!errors.products?.[index]?.srNo
+                                                                    touched.products?.[index]?.product_barcode && !!errors.products?.[index]?.product_barcode
                                                                 }
                                                                 helperText={
-                                                                    touched.products?.[index]?.srNo && errors.products?.[index]?.srNo ? (
+                                                                    touched.products?.[index]?.product_barcode && errors.products?.[index]?.product_barcode ? (
                                                                         <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].srNo}
+                                                                            {errors.products[index].product_barcode}
                                                                         </Typography>
                                                                     ) : null
                                                                 }
@@ -227,7 +277,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                         <TableCell sx={{ padding: "8px" }}>
                                                             <Field
                                                                 as={TextField}
-                                                                name={`products[${index}].scanId`}
+                                                                name={`products[${index}]._id`}
                                                                 size="small"
                                                                 variant="outlined"
                                                                 fullWidth
@@ -238,12 +288,12 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                                     },
                                                                 }}
                                                                 error={
-                                                                    touched.products?.[index]?.scanId && !!errors.products?.[index]?.scanId
+                                                                    touched.products?.[index]?._id && !!errors.products?.[index]?._id
                                                                 }
                                                                 helperText={
-                                                                    touched.products?.[index]?.scanId && errors.products?.[index]?.scanId ? (
+                                                                    touched.products?.[index]?._id && errors.products?.[index]?._id ? (
                                                                         <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].scanId}
+                                                                            {errors.products[index]._id}
                                                                         </Typography>
                                                                     ) : null
                                                                 }
@@ -252,7 +302,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                         <TableCell sx={{ padding: "8px" }}>
                                                             <Field
                                                                 as={TextField}
-                                                                name={`products[${index}].products`}
+                                                                name={`products[${index}].product_name`}
                                                                 size="small"
                                                                 variant="outlined"
                                                                 fullWidth
@@ -263,14 +313,14 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                                     },
                                                                 }}
                                                                 error={
-                                                                    touched.products?.[index]?.products &&
-                                                                    !!errors.products?.[index]?.products
+                                                                    touched.products?.[index]?.product_name &&
+                                                                    !!errors.products?.[index]?.product_name
                                                                 }
                                                                 helperText={
-                                                                    touched.products?.[index]?.products &&
-                                                                        errors.products?.[index]?.products ? (
+                                                                    touched.products?.[index]?.product_name &&
+                                                                        errors.products?.[index]?.product_name ? (
                                                                         <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].products}
+                                                                            {errors.products[index].product_name}
                                                                         </Typography>
                                                                     ) : null
                                                                 }
@@ -350,9 +400,9 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                                         <IconButton
                                                             onClick={() =>
                                                                 push({
-                                                                    srNo: `#${(values.products.length + 1).toString().padStart(4, "0")}`,
-                                                                    scanId: "",
-                                                                    products: "",
+                                                                    product_barcode: "",
+                                                                    _id: "",
+                                                                    product_name: "",
                                                                     quantity: "",
                                                                     unit: "",
                                                                 })
@@ -374,7 +424,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag }) => {
                                     </TableContainer>
                                     <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
                                         <Button
-                                            type="submit"
+                                            onClick={() => { handleSubmit(values) }}
                                             variant="contained"
                                             sx={{
                                                 backgroundColor: Colors.primary,

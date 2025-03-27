@@ -1,8 +1,6 @@
-import { useGetClients } from './../enquiry/useGetAllClients';
 import { useQuery } from "@tanstack/react-query";
 import { makeRequest } from "../../constants/makeRequest";
 import { GET_ALL_ORDERS } from "../../constants/urls";
-
 
 interface FetchOrdersParams {
     page: number;

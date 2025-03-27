@@ -10,7 +10,7 @@ const Order = ({ enquiryDetails }: OrderProps) => {
     const { data } = useGetOrderByEnquiryId(enquiryDetails?._id);
 
     return (
-        <DataTable orderDetails={data?.data} enquiryId={enquiryDetails?._id} />
+        <DataTable orderDetails={data?.data} enquiryId={enquiryDetails?._id} currentStatus={enquiryDetails?.status} />
     )
 }
 

@@ -1,24 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
 import { makeRequest } from "../../constants/makeRequest";
-import { UPDATE_ENQUIRY } from "../../constants/urls";
+import { CREATE_CHALLAN } from "../../constants/urls";
 
-interface UpdateEnquiryProps {
-  enquiryData: any;
-  enquiryId: string;
-}
-
-const updateEnquiry = async ({
-  enquiryData,
-  enquiryId,
-}: UpdateEnquiryProps) => {
+const addChallan = async (challanData: any) => {
   try {
     const res = await makeRequest<{
+      success: boolean;
+      status: string;
+      message: string;
       data: any;
     }>({
-      method: "PUT",
-      pathname: UPDATE_ENQUIRY(enquiryId),
-      // token: true,
-      values: enquiryData,
+      method: "POST",
+      pathname: CREATE_CHALLAN,
+      values: challanData,
+      showMessage: true,
+      show_success_message: true,
+      show_error_message: true,
     });
 
     if (!res || res.status !== "success") {
@@ -32,8 +29,8 @@ const updateEnquiry = async ({
   }
 };
 
-export const useUpdateEnquiry = () => {
+export const useAddChallan = () => {
   return useMutation({
-    mutationFn: updateEnquiry,
+    mutationFn: addChallan,
   });
 };

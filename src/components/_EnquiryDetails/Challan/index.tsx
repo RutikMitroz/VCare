@@ -9,7 +9,7 @@ interface ChallanProps {
 const Challan = ({ enquiryDetails }: ChallanProps) => {
     const [flag, setFlag] = useState(false);
     return (
-        flag ? <DataTable setFlag={setFlag} /> : <CreateChallanForm setFlag={setFlag} />
+        flag ? <DataTable setFlag={setFlag} /> : <CreateChallanForm setFlag={setFlag} enquiryDetails={enquiryDetails} />
 
     )
 }

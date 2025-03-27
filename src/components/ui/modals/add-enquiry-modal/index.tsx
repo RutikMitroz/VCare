@@ -161,10 +161,18 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                                 }
                                             }}
                                             error={touched.clientName && !!errors.clientName}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: "250px",
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                    },
+                                                },
+                                            }}
                                         >
-                                            <MenuItem value="">Select Client</MenuItem>
                                             {data?.data?.map((client: any) => (
-                                                <MenuItem key={client.client_name} value={client._id}>
+                                                <MenuItem sx={{ fontSize: "18px" }} key={client.client_name} value={client._id}>
                                                     {client.client_name}
                                                 </MenuItem>
                                             ))}
@@ -179,6 +187,10 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                                     "&:hover": {
                                                         backgroundColor: "#BBDEFB",
                                                     },
+                                                    position: "sticky",
+                                                    bottom: 0,
+                                                    zIndex: 1,
+                                                    borderTop: "1px solid #E0E0E0",
                                                 }}
                                             >
                                                 <AddIcon sx={{ fontSize: '16px' }} />  Add New Client
@@ -265,10 +277,18 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                             name="assignEnquiry"
                                             label="Assign Enquiry"
                                             error={touched.assignEnquiry && !!errors.assignEnquiry}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: "250px",
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                    },
+                                                },
+                                            }}
                                         >
-                                            <MenuItem value="">Select Salesman</MenuItem>
                                             {salesmans?.data?.map((salesman: any) => (
-                                                <MenuItem key={salesman._id} value={salesman._id}>
+                                                <MenuItem sx={{ fontSize: "20px" }} key={salesman._id} value={salesman._id}>
                                                     {salesman.user_name}
                                                 </MenuItem>
                                             ))}
@@ -286,8 +306,16 @@ const AddEnquiryModal = ({ open, onClose }: AddEnquiryModalProps) => {
                                             name="enquiryFor"
                                             label="Enquiry For"
                                             error={touched.enquiryFor && !!errors.enquiryFor}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: "250px",
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                    },
+                                                },
+                                            }}
                                         >
-                                            <MenuItem value="">Select</MenuItem>
                                             <MenuItem value="CCTV">CCTV</MenuItem>
                                             <MenuItem value="Access Control">Access Control</MenuItem>
                                             <MenuItem value="Networking">Networking</MenuItem>

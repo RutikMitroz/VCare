@@ -6,6 +6,8 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { Colors } from "../../../../constants/Colors";
 import { useGetProducts } from "../../../../hooks/enquiry/useGetAllProducts";
 import { useState, useEffect } from "react";
@@ -18,6 +20,7 @@ interface Product {
     product_name: string;
     unit: string;
     product_price: number | "";
+    quantity: number | ""; // Already number | "" in your code
 }
 
 interface Quotation {
@@ -41,6 +44,9 @@ const validationSchema = Yup.object({
                 product_price: Yup.number()
                     .required("Product price is required")
                     .min(0, "Product price cannot be negative"),
+                quantity: Yup.number()
+                    .required("Quantity is required")
+                    .min(1, "Quantity must be at least 1"),
             })
         )
         .min(1, "At least one product is required"),
@@ -52,13 +58,21 @@ const validationSchema = Yup.object({
 
 const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enquiryId, clientId }) => {
     const initialValues: Quotation = {
-        products: [],
+        products: [
+            {
+                _id: "",
+                product_name: "",
+                unit: "",
+                product_price: "",
+                quantity: 1,
+            },
+        ],
         discountPercent: 0,
     };
 
     const queryClient = useQueryClient();
 
-    const [searchStates, setSearchStates] = useState<string[]>([]);
+    const [searchStates, setSearchStates] = useState<string[]>([""]);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
 
     const updateSearchState = (index: number, value: string) => {
@@ -71,7 +85,14 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
 
     const { mutate } = useAddQuotation();
 
-    const { data: productsData, isLoading } = useGetProducts("");
+    const { data: ps, isLoading } = useGetProducts({
+        page: 0,
+        limit: 0,
+        search: "",
+    });
+
+    const productsData = ps?.data;
+
     useEffect(() => {
         if (productsData) {
             setAllProducts(productsData);
@@ -85,7 +106,8 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
     const calculateTotals = (products: Product[], discountPercent: number | "") => {
         const totalAmount = products.reduce((sum, product) => {
             const product_price = Number(product.product_price) || 0;
-            return sum + product_price;
+            const quantity = Number(product.quantity) || 1;
+            return sum + product_price * quantity;
         }, 0);
 
         const taxableAmount = 0;
@@ -160,9 +182,12 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                             queryClient.invalidateQueries({ queryKey: ["quotations-by-enquiry-id"] });
                             queryClient.invalidateQueries({ queryKey: ['enquiry-by-id', enquiryId] });
                             queryClient.invalidateQueries({ queryKey: ['enquiries'] });
-                        }
+                            setFlag(false);
+                        },
+                        onError: (error) => {
+                            console.error("Error adding quotation:", error);
+                        },
                     });
-                    setFlag(false);
                 }}
             >
                 {({ values, errors, touched, setFieldValue }) => {
@@ -180,7 +205,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                             <Table>
                                                 <TableHead>
                                                     <TableRow sx={{ bgcolor: Colors.primary }}>
-                                                        {["Sr. No.", "Product Name", "Unit", "Price", "Action"].map((header) => (
+                                                        {["Sr. No.", "Product Name", "Price", "Unit", "Quantity", "Action"].map((header) => (
                                                             <TableCell
                                                                 key={header}
                                                                 sx={{
@@ -334,33 +359,6 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                 <TableCell sx={{ padding: "8px" }}>
                                                                     <Field
                                                                         as={TextField}
-                                                                        name={`products[${index}].unit`}
-                                                                        size="small"
-                                                                        variant="outlined"
-                                                                        fullWidth
-                                                                        disabled={isPredefined}
-                                                                        sx={{
-                                                                            "& .MuiInputBase-root": {
-                                                                                fontSize: "14px",
-                                                                                borderRadius: "8px",
-                                                                                width: "100px",
-                                                                            },
-                                                                        }}
-                                                                        error={
-                                                                            touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
-                                                                        }
-                                                                        helperText={
-                                                                            touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
-                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                    {errors.products[index].unit}
-                                                                                </Typography>
-                                                                            ) : null
-                                                                        }
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell sx={{ padding: "8px" }}>
-                                                                    <Field
-                                                                        as={TextField}
                                                                         name={`products[${index}].product_price`}
                                                                         type="number"
                                                                         size="small"
@@ -389,6 +387,61 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                     />
                                                                 </TableCell>
                                                                 <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].unit`}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        disabled={isPredefined}
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                                width: "100px",
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].unit}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
+                                                                    <Field
+                                                                        as={TextField}
+                                                                        name={`products[${index}].quantity`}
+                                                                        type="number"
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                fontSize: "14px",
+                                                                                borderRadius: "8px",
+                                                                                width: "100px", // Consistent width with other fields
+                                                                            },
+                                                                        }}
+                                                                        error={
+                                                                            touched.products?.[index]?.quantity && !!errors.products?.[index]?.quantity
+                                                                        }
+                                                                        helperText={
+                                                                            touched.products?.[index]?.quantity && errors.products?.[index]?.quantity ? (
+                                                                                <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                                    {errors.products[index].quantity}
+                                                                                </Typography>
+                                                                            ) : null
+                                                                        }
+                                                                        inputProps={{ min: 1 }} // Prevents negative input in the browser
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell sx={{ padding: "8px" }}>
                                                                     <IconButton
                                                                         onClick={() => {
                                                                             remove(index);
@@ -407,7 +460,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                         );
                                                     })}
                                                     <TableRow>
-                                                        <TableCell colSpan={5} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
+                                                        <TableCell colSpan={6} sx={{ textAlign: "right", padding: "8px", paddingRight: "40px" }}>
                                                             <IconButton
                                                                 onClick={() => {
                                                                     push({
@@ -415,6 +468,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                         product_name: "",
                                                                         unit: "",
                                                                         product_price: "",
+                                                                        quantity: 1, // Default quantity for new product
                                                                     });
                                                                     setSearchStates((prev) => [...prev, ""]);
                                                                 }}
