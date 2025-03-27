@@ -1,6 +1,5 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, } from "@mui/material";
-import CustomMenuList from "../../utilities/CustomMenuList";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, Typography, } from "@mui/material";
 import { displayShortId } from "../../../utils/displayShortId";
 import { useNavigate } from "react-router-dom";
 import { Colors } from "../../../constants/Colors";
@@ -25,11 +24,6 @@ const DataTable = ({
     handleChangePage,
     handleChangeRowsPerPage,
 }: DataTableProps) => {
-    const menuDataRef = React.useRef<any | null>(null);
-    const [openMenu, setOpenMenu] = React.useState(false);
-    const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
-        null
-    );
 
     const navigate = useNavigate();
 
@@ -119,19 +113,27 @@ const DataTable = ({
                                     <TableCell align="center">{enquiry.assign_to.user_name}</TableCell>
                                     <TableCell align="center">{enquiry.enquiry_for}</TableCell>
                                     <TableCell align="center">
-                                        <Chip
-                                            label={enquiry.status}
+                                        {/* <Chip
+                                            label={enquiry.status === "not_contacted" ? "Not Contacted" : enquiry.status === "quotation_created" ? "Quotation Created" : enquiry.status === "order_created" ? "Order Created" : enquiry.status}
                                             sx={{
                                                 backgroundColor:
-                                                    enquiry.status === "QUOTATION SENT"
-                                                        ? "#4CAF50"
-                                                        : "#F44336",
+                                                    enquiry.status === "not_contacted"
+                                                        ? "#F44336"
+                                                        : "#4CAF50",
                                                 color: "#FFFFFF",
                                                 fontWeight: "bold",
                                                 fontSize: "12px",
                                                 height: "24px",
                                             }}
-                                        />
+                                        /> */}
+                                        <Typography sx={{
+                                            color:
+                                                enquiry.status === "not_contacted"
+                                                    ? "#F44336"
+                                                    : "#4CAF50",
+                                            fontSize: "14px",
+                                            height: "24px",
+                                        }}>{enquiry.status === "not_contacted" ? "Not Contacted" : enquiry.status === "quotation_created" ? "Quotation Created" : enquiry.status === "order_created" ? "Order Created" : enquiry.status}</Typography>
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -162,22 +164,6 @@ const DataTable = ({
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Box>
-
-            {menuAnchorEl && openMenu && menuDataRef.current && (
-                <CustomMenuList
-                    open={openMenu}
-                    setOpenMenu={setOpenMenu}
-                    menuAnchorEl={menuAnchorEl}
-                    setMenuAnchorEl={setMenuAnchorEl}
-                    menuItems={[
-                        {
-                            title: "More details",
-                            iconImage: "/assets/icons/more_details.png",
-                            // fn: () => navigate(`/enquiries/${menuDataRef.current?._id ?? ""}`),
-                        },
-                    ]}
-                />
-            )}
         </>
     );
 };

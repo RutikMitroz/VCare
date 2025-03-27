@@ -2,8 +2,8 @@ import React from "react";
 import { Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, FormHelperText } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Colors } from "../../constants/Colors";
-import { useAddUser } from "../../hooks/masters/useAddUser";
+import { Colors } from "../../../constants/Colors";
+import { useAddUser } from "../../../hooks/masters/useAddUser";
 
 // Sample data for role options
 const roleOptions = [
