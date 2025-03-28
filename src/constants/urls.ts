@@ -47,3 +47,6 @@ export const GET_ALL_USERS = "api/user/get";
 export const GET_PRODUCT_BY_PRODUCT_BARCODE = (product_barcode: string) =>
   `api/inventory/ByBarcode/${product_barcode}`;
 export const ADD_GRN = "api/inventory/addInventory";
+
+//complaints
+export const GET_ALL_COMPLAINTS="api/complaint/get";
