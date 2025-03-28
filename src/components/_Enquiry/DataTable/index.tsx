@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, Typography, } from "@mui/material";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Typography, } from "@mui/material";
 import { displayShortId } from "../../../utils/displayShortId";
 import { useNavigate } from "react-router-dom";
 import { Colors } from "../../../constants/Colors";
