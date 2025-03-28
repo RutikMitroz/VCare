@@ -1,7 +1,7 @@
 import { Box, Typography, Autocomplete, TextField, Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Colors } from "../../constants/Colors";
+import { Colors } from "../../../constants/Colors";
 
 // Sample data for dropdowns
 const productOptions = [

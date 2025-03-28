@@ -8,31 +8,16 @@ import {
   TableRow,
   Box,
   TableBody,
+  Chip,
 } from "@mui/material";
+import CustomMenuList from "../../utilities/CustomMenuList";
 import { displayShortId } from "../../../utils/displayShortId";
 import { useNavigate } from "react-router-dom";
 import { Colors } from "../../../constants/Colors";
-import MessageBox from "../../utilities/MessageBox";
-
-interface Order {
-  _id: string;
-  quotation_id: {
-    _id: string;
-    clientId: {
-      client_name: string;
-      client_phone: string;
-    };
-    enquiry_id: string;
-    product_name: string;
-    total_amount: number;
-  };
-  createdAt: string;
-  order_status: string;
-  estimate_required_time: string;
-}
+import convertDateToString from "../../../utils/convertDateToString";
 
 interface DataTableProps {
-  appointments: Order[];
+  complaints: any[];
   page: number;
   rowsPerPage: number;
   totalNoOfDocs: number;
@@ -44,13 +29,19 @@ interface DataTableProps {
 }
 
 const DataTable = ({
-  appointments,
+  complaints,
   page,
   rowsPerPage,
   totalNoOfDocs,
   handleChangePage,
   handleChangeRowsPerPage,
 }: DataTableProps) => {
+  const menuDataRef = React.useRef<any | null>(null);
+  const [openMenu, setOpenMenu] = React.useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
+    null
+  );
+
   const navigate = useNavigate();
 
   const headerCellStyle = {
@@ -64,19 +55,6 @@ const DataTable = ({
     top: 0,
     zIndex: 1,
   } as const;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "In Progress":
-        return "#459CFF";
-      case "Pending":
-        return "#FF0000";
-      case "Completed":
-        return "#60CA72";
-      default:
-        return "#F44336";
-    }
-  };
 
   return (
     <>
@@ -100,25 +78,22 @@ const DataTable = ({
                     borderTopLeftRadius: "12px",
                   }}
                 >
-                  Order ID
+                  Complaint ID
                 </TableCell>
                 <TableCell align="center" sx={headerCellStyle}>
-                  Date
+                  Complaint Date
                 </TableCell>
                 <TableCell align="center" sx={headerCellStyle}>
-                  Customer Name
+                  Client Name
                 </TableCell>
                 <TableCell align="center" sx={headerCellStyle}>
-                  Phone
+                  Contact Number
                 </TableCell>
                 <TableCell align="center" sx={headerCellStyle}>
-                  Product
+                  Assigned To
                 </TableCell>
                 <TableCell align="center" sx={headerCellStyle}>
-                  Total Amount
-                </TableCell>
-                <TableCell align="center" sx={headerCellStyle}>
-                  Assigned Technician
+                  Complaint
                 </TableCell>
                 <TableCell
                   align="center"
@@ -132,13 +107,11 @@ const DataTable = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {appointments.length > 0 ? (
-                appointments.map((order, index) => (
+              {complaints.length > 0 ? (
+                complaints.map((complaint, index) => (
                   <TableRow
-                    onClick={() =>
-                      navigate(`/enquiry/${order.quotation_id?.enquiry_id}`)
-                    }
-                    key={order._id}
+                    onClick={() => navigate(`/complaints/${complaint._id}`)}
+                    key={complaint._id}
                     sx={{
                       cursor: "pointer",
                       backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
@@ -154,41 +127,40 @@ const DataTable = ({
                     }}
                   >
                     <TableCell align="center">
-                      {displayShortId(order._id)}
+                      {displayShortId(complaint._id)}
+                    </TableCell>
+                    <TableCell align="center">{convertDateToString(complaint?.createdAt)}</TableCell>
+                    <TableCell align="center">
+                      {complaint.client_id.client_name}
                     </TableCell>
                     <TableCell align="center">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {complaint.client_id.client_phone}
                     </TableCell>
                     <TableCell align="center">
-                      {order.quotation_id?.clientId?.client_name}
+                      {complaint.assign_to.user_name}
                     </TableCell>
+                    <TableCell align="center">{complaint.complaint_details}</TableCell>
                     <TableCell align="center">
-                      {order.quotation_id?.clientId?.client_phone}
-                    </TableCell>
-                    <TableCell align="center">
-                      {order.quotation_id?.product_name}
-                    </TableCell>
-                    <TableCell align="center">
-                      ₹{order.quotation_id?.total_amount}
-                    </TableCell>
-                    <TableCell align="center">Jack Reacher</TableCell>
-                    <TableCell align="center">
-                      <span
-                        style={{
-                          color: getStatusColor(order.order_status),
-                          fontWeight: "500",
-                          fontSize: "14px",
+                      <Chip
+                        label={complaint.status}
+                        sx={{
+                          backgroundColor:
+                            complaint.status === "QUOTATION SENT"
+                              ? "#4CAF50"
+                              : "#F44336",
+                          color: "#FFFFFF",
+                          fontWeight: "bold",
+                          fontSize: "12px",
+                          height: "24px",
                         }}
-                      >
-                        {order.order_status}
-                      </span>
+                      />
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} align="center">
-                    No Orders available
+                  <TableCell colSpan={5} align="center">
+                    No complaints available
                   </TableCell>
                 </TableRow>
               )}
@@ -211,6 +183,22 @@ const DataTable = ({
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Box>
+
+      {menuAnchorEl && openMenu && menuDataRef.current && (
+        <CustomMenuList
+          open={openMenu}
+          setOpenMenu={setOpenMenu}
+          menuAnchorEl={menuAnchorEl}
+          setMenuAnchorEl={setMenuAnchorEl}
+          menuItems={[
+            {
+              title: "More details",
+              iconImage: "/assets/icons/more_details.png",
+              // fn: () => navigate(`/complaints/${menuDataRef.current?._id ?? ""}`),
+            },
+          ]}
+        />
+      )}
     </>
   );
 };

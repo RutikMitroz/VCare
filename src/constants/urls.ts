@@ -40,3 +40,6 @@ export const GET_ALL_ORDERS = "api/order/getOrder";
 
 //inventory urls
 export const ADD_GRN = "api/inventory/addInventory";
+
+//complaints
+export const GET_ALL_COMPLAINTS="api/complaint/get";

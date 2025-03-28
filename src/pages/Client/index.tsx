@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import Layout from "../../components/Layout";
 import LazyLoadingWrapper from '../../components/utilities/LazyLoadingWrapper';
-import RenderClient from '../../components/_Client';
+import RenderClient from '../../components/_Master/_Client';
 
 const Client = () => {
   return (

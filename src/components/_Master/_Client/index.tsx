@@ -1,8 +1,8 @@
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Colors } from "../../constants/Colors";
-import { useAddClient } from "../../hooks/masters/useAddClient";
+import { Colors } from "../../../constants/Colors";
+import { useAddClient } from "../../../hooks/masters/useAddClient";
 
 const textFieldStyles = {
   backgroundColor: "white",
