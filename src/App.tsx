@@ -16,6 +16,7 @@ import Client from "./pages/Master/Client";
 import UserMaster from "./pages/Master/UserMaster";
 import Supplier from "./pages/Master/Supplier";
 import AddGRN from "./pages/AddGRN";
+import ComplaintsDetails from "./pages/ComplaintsDetails";
 import Category from "./pages/Master/Category";
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/complaints" element={<Complaints />} />
+            <Route path="/complaints/:id" element={<ComplaintsDetails/>} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/inventory/add-grn" element={<AddGRN />} />
             <Route path="/payments" element={<Payments />} />

@@ -137,8 +137,6 @@ const RenderOrder = () => {
           <MessageBox message="Something went wrong" />
         ) : isFetching ? (
           <Spinner />
-        ) : orderData?.data?.length === 0 ? (
-          <MessageBox message="No orders Found" />
         ) : (
           <DataTable
             appointments={orderData?.data || []}

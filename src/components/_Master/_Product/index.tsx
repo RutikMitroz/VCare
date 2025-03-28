@@ -1,3 +1,4 @@
+
 import { Box, Typography, TextField, Button, Autocomplete } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -36,6 +37,7 @@ const textFieldStyles = {
 };
 
 const validationSchema = Yup.object({
+
   product_name: Yup.string().required("Product Name is required"),
   product_category: Yup.string().required("Category is required"),
   waranty_period: Yup.string().required("Waranty Period is required"),
@@ -106,6 +108,7 @@ const RenderProduct = () => {
         <Typography variant="h5" sx={{ fontWeight: 500, mb: 3, fontSize: "18px" }}>
           Product Master
         </Typography>
+
 
         {
           isLoading ? <Spinner />
