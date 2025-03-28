@@ -6,8 +6,6 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { Colors } from "../../../../constants/Colors";
 import { useGetProducts } from "../../../../hooks/enquiry/useGetAllProducts";
 import { useState, useEffect } from "react";
@@ -19,8 +17,8 @@ interface Product {
     _id: string;
     product_name: string;
     unit: string;
-    product_price: number | "";
-    quantity: number | ""; // Already number | "" in your code
+    unit_price: number | "";
+    quantity: number | ""; 
 }
 
 interface Quotation {
@@ -41,7 +39,7 @@ const validationSchema = Yup.object({
                 _id: Yup.string().required("Sr. No. is required"),
                 product_name: Yup.string().required("Product name is required"),
                 unit: Yup.string().required("Unit is required"),
-                product_price: Yup.number()
+                unit_price: Yup.number()
                     .required("Product price is required")
                     .min(0, "Product price cannot be negative"),
                 quantity: Yup.number()
@@ -63,7 +61,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                 _id: "",
                 product_name: "",
                 unit: "",
-                product_price: "",
+                unit_price: "",
                 quantity: 1,
             },
         ],
@@ -105,9 +103,9 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
 
     const calculateTotals = (products: Product[], discountPercent: number | "") => {
         const totalAmount = products.reduce((sum, product) => {
-            const product_price = Number(product.product_price) || 0;
+            const unit_price = Number(product.unit_price) || 0;
             const quantity = Number(product.quantity) || 1;
-            return sum + product_price * quantity;
+            return sum + unit_price * quantity;
         }, 0);
 
         const taxableAmount = 0;
@@ -282,13 +280,13 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                                         setFieldValue(`products[${index}]._id`, selected._id);
                                                                                         setFieldValue(`products[${index}].product_name`, selected.product_name);
                                                                                         setFieldValue(`products[${index}].unit`, selected.unit);
-                                                                                        setFieldValue(`products[${index}].product_price`, selected.product_price);
+                                                                                        setFieldValue(`products[${index}].unit_price`, selected.unit_price);
                                                                                         updateSearchState(index, "");
                                                                                     } else {
                                                                                         setFieldValue(`products[${index}]._id`, "");
                                                                                         setFieldValue(`products[${index}].product_name`, "");
                                                                                         setFieldValue(`products[${index}].unit`, "");
-                                                                                        setFieldValue(`products[${index}].product_price`, "");
+                                                                                        setFieldValue(`products[${index}].unit_price`, "");
                                                                                     }
                                                                                 }}
                                                                                 onInputChange={(event, newInputValue) => {
@@ -359,7 +357,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                 <TableCell sx={{ padding: "8px" }}>
                                                                     <Field
                                                                         as={TextField}
-                                                                        name={`products[${index}].product_price`}
+                                                                        name={`products[${index}].unit_price`}
                                                                         type="number"
                                                                         size="small"
                                                                         variant="outlined"
@@ -373,14 +371,14 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                             },
                                                                         }}
                                                                         error={
-                                                                            touched.products?.[index]?.product_price &&
-                                                                            !!errors.products?.[index]?.product_price
+                                                                            touched.products?.[index]?.unit_price &&
+                                                                            !!errors.products?.[index]?.unit_price
                                                                         }
                                                                         helperText={
-                                                                            touched.products?.[index]?.product_price &&
-                                                                                errors.products?.[index]?.product_price ? (
+                                                                            touched.products?.[index]?.unit_price &&
+                                                                                errors.products?.[index]?.unit_price ? (
                                                                                 <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                                    {errors.products[index].product_price}
+                                                                                    {errors.products[index].unit_price}
                                                                                 </Typography>
                                                                             ) : null
                                                                         }
@@ -467,7 +465,7 @@ const CreateQuotationForm: React.FC<CreateQuotationFormProps> = ({ setFlag, enqu
                                                                         _id: "",
                                                                         product_name: "",
                                                                         unit: "",
-                                                                        product_price: "",
+                                                                        unit_price: "",
                                                                         quantity: 1, // Default quantity for new product
                                                                     });
                                                                     setSearchStates((prev) => [...prev, ""]);

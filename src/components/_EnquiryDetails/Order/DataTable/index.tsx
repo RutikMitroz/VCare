@@ -140,7 +140,7 @@ const DataTable = ({ orderDetails, enquiryId, currentStatus }: DataTableProps) =
                                         <TableCell align="center">{displayShortId(product?.product_id)}</TableCell>
                                         <TableCell align="center">{product?.product_name}</TableCell>
                                         <TableCell align="center">{product?.unit}</TableCell>
-                                        <TableCell align="center">{product?.product_price
+                                        <TableCell align="center">{product?.unit_price
                                         }</TableCell>
                                         <TableCell align="center">{product?.quantity}</TableCell>
                                         <TableCell align="center">{product?.total_amount}</TableCell>

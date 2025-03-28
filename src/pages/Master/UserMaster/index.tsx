@@ -1,8 +1,8 @@
-import React from 'react';
 import { Helmet } from 'react-helmet';
-import Layout from "../../components/Layout";
-import LazyLoadingWrapper from '../../components/utilities/LazyLoadingWrapper';
-import RenderUserMaster from '../../components/_Master/_UserMaster';
+import Layout from "../../../components/Layout";
+import LazyLoadingWrapper from '../../../components/utilities/LazyLoadingWrapper';
+import RenderUserMaster from '../../../components/_Master/_UserMaster';
+
 
 const UserMaster = () => {
   return (

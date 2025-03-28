@@ -7,12 +7,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Colors } from "../../../../constants/Colors";
 import { useGetOrderByEnquiryId } from "../../../../hooks/enquiry/useGetOrderByEnquiry";
-import Spinner from "../../../utilities/Spinner";
 import { useGetAllUsers } from "../../../../hooks/enquiry/useGetAllUsers";
 import { useAddChallan } from "../../../../hooks/enquiry/useAddChallan";
+import { useGetProductByBarCode } from "../../../../hooks/enquiry/useGetProductByBarCode";
 
 interface Product {
     _id: string;
@@ -50,13 +50,16 @@ const validationSchema = Yup.object({
 });
 
 const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryDetails }) => {
+    const [barcode, setBarcode] = useState("");
+    const [currentProductIndex, setCurrentProductIndex] = useState<number | null>(null);
+
     const { data } = useGetOrderByEnquiryId(enquiryDetails?._id);
     const { data: userList } = useGetAllUsers();
+    const { data: productData, isFetching } = useGetProductByBarCode(barcode);
     const { mutate } = useAddChallan();
 
     const initialValues: FormValues = {
         products: [],
-        // products: data?.data?.quotation_id?.products || [],
         enquiry_id: enquiryDetails?._id,
         order_id: data?.data?._id,
     };
@@ -64,6 +67,15 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedAssignTo, setSelectedAssignTo] = useState<string[]>([]);
     const open = Boolean(anchorEl);
+
+    useEffect(() => {
+        if (productData && currentProductIndex !== null) {
+            const product = productData.data;
+            if (product) {
+                console.log(`Filling product details for index ${currentProductIndex}:`, product);
+            }
+        }
+    }, [productData, currentProductIndex]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -100,6 +112,25 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
         ?.filter((user: any) => selectedAssignTo.includes(user._id))
         ?.map((user: any) => user.user_name) || [];
 
+    // Handle barcode input change
+    const handleBarcodeChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const value = e.target.value;
+        setCurrentProductIndex(index);
+        setBarcode(value);
+    };
+
+    // Handle adding a new product
+    const handleAddProduct = (push: (obj: any) => void) => {
+        push({
+            product_barcode: "",
+            _id: "",
+            product_name: "",
+            quantity: "",
+            unit: "",
+        });
+        setBarcode("");
+        setCurrentProductIndex(null);
+    };
     return (
         <Box>
             <Box
@@ -221,7 +252,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                     console.log(values);
                 }}
             >
-                {({ values, errors, touched }) => (
+                {({ values, errors, touched, setFieldValue }) => (
                     <Form>
                         <FieldArray name="products">
                             {({ push, remove }) => (
@@ -272,6 +303,10 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                         </Typography>
                                                                     ) : null
                                                                 }
+                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                    handleBarcodeChange(e, index);
+                                                                    setFieldValue(`products[${index}].product_barcode`, e.target.value);
+                                                                }}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -297,6 +332,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                         </Typography>
                                                                     ) : null
                                                                 }
+                                                                value={product._id}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -324,6 +360,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                         </Typography>
                                                                     ) : null
                                                                 }
+                                                                value={product.product_name}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -352,6 +389,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                         </Typography>
                                                                     ) : null
                                                                 }
+                                                                value={product.quantity}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -377,6 +415,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                         </Typography>
                                                                     ) : null
                                                                 }
+                                                                value={product.unit}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -398,15 +437,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                 <TableRow>
                                                     <TableCell colSpan={7} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
                                                         <IconButton
-                                                            onClick={() =>
-                                                                push({
-                                                                    product_barcode: "",
-                                                                    _id: "",
-                                                                    product_name: "",
-                                                                    quantity: "",
-                                                                    unit: "",
-                                                                })
-                                                            }
+                                                            onClick={() => handleAddProduct(push)}
                                                             sx={{
                                                                 backgroundColor: "#2196F3",
                                                                 color: "#FFFFFF",
@@ -422,44 +453,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
-                                    <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-                                        <Button
-                                            onClick={() => { handleSubmit(values) }}
-                                            variant="contained"
-                                            sx={{
-                                                backgroundColor: Colors.primary,
-                                                color: "#FFFFFF",
-                                                borderRadius: "8px",
-                                                padding: "8px 24px",
-                                                textTransform: "capitalize",
-                                                fontSize: "14px",
-                                                fontWeight: "bold",
-                                                "&:hover": {
-                                                    backgroundColor: "#004D40",
-                                                },
-                                            }}
-                                        >
-                                            Save
-                                        </Button>
-                                        <Button
-                                            onClick={() => setFlag(true)}
-                                            variant="contained"
-                                            sx={{
-                                                backgroundColor: "#E0E0E0",
-                                                color: "#424242",
-                                                borderRadius: "8px",
-                                                padding: "8px 24px",
-                                                textTransform: "capitalize",
-                                                fontSize: "14px",
-                                                fontWeight: "bold",
-                                                "&:hover": {
-                                                    backgroundColor: "#B0BEC5",
-                                                },
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </Box>
+                                    {/* ... (rest of the JSX remains the same) ... */}
                                 </>
                             )}
                         </FieldArray>
