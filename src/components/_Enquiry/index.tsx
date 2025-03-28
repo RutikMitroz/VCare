@@ -27,13 +27,35 @@ const RenderEnquiry = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const { data, isFetching, isError } = useGetEnquiries({ page, limit: rowsPerPage });
+  const { data, isFetching, isError } = useGetEnquiries({ page, limit: rowsPerPage })
+  const summary = [
+    {
+      text: "Total Enquiries",
+      value: data?.summary?.totalEnquiries,
+      color: "#459CFF"
+    },
+    {
+      text: "Quotation Sent",
+      value: data?.summary?.quotation_sent,
+      color: "#60CA72"
+    },
+    {
+      text: "Not Contacted",
+      value: data?.summary?.not_contacted,
+      color: "#FF0000"
+    },
+    {
+      text: "Reminder",
+      value: data?.summary?.remainder,
+      color: "#1F1F1F"
+    }
+  ]
 
   return (
     <Box sx={{ display: "flex", gap: "2rem", justifyContent: "space-between" }}>
       <Box sx={{ width: "25%", backgroundColor: "white", borderRadius: "16px", padding: "16px", border: "2px solid #E0E0E0" }}>
 
-        <Sidebar summary={data?.summary} />
+        <Sidebar summary={summary} />
       </Box>
       <Box sx={{ width: "75%" }}>
         <Box
@@ -105,16 +127,15 @@ const RenderEnquiry = () => {
           </Button>
         </Box>
         {isError ? <MessageBox message="Something went wrong" />
-          : isFetching ? <Spinner />
-            : data?.data?.length === 0 ? <MessageBox message="No Enquiries Found" /> :
-              <DataTable
-                enquiries={data?.data}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                totalNoOfDocs={data?.summary?.totalEnquiries}
-                handleChangePage={handleChangePage}
-                handleChangeRowsPerPage={handleChangeRowsPerPage}
-              />
+          : isFetching ? <Spinner /> :
+            <DataTable
+              enquiries={data?.data}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              totalNoOfDocs={data?.summary?.totalEnquiries}
+              handleChangePage={handleChangePage}
+              handleChangeRowsPerPage={handleChangeRowsPerPage}
+            />
         }
       </Box>
       <AddEnquiryModal open={open} onClose={handleClose} />

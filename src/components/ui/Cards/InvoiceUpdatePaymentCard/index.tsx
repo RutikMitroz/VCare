@@ -4,6 +4,7 @@ import {
   TableRow, TextField, IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { Colors } from "../../../../constants/Colors";
 
 // interface UpdatePaymentsProps {
 //   remainingAmount: string;
@@ -48,7 +49,7 @@ const InvoiceUpdatePaymentCard = () => {
       <TableContainer sx={{ bgcolor: "#FFFFFF", borderRadius: 2 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: "#1D434C" }}>
+            <TableRow sx={{ bgcolor: Colors.primary }}>
               {["Sr. No.", "Paid Amount", "Remaining Amount", "Action"].map((header) => (
                 <TableCell
                   key={header}

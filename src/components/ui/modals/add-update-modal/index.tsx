@@ -4,6 +4,7 @@ import { Modal, Box, Typography, TextField, Grid, Button } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { Colors } from "../../../../constants/Colors";
 
 interface addUpdate {
     writeNote: string;
@@ -141,7 +142,7 @@ const AddUpdateModal = ({ open, onClose }: AddUpdateModalProps) => {
                                     type="submit"
                                     variant="contained"
                                     sx={{
-                                        backgroundColor: "#1D434C",
+                                        backgroundColor: Colors.primary,
                                         paddingX: 12,
                                         fontWeight: "bold",
                                         color: "#FFFFFF",

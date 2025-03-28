@@ -1,45 +1,30 @@
-import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, IconButton, Typography, Button, } from "@mui/material";
+import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, IconButton, Typography, Button, Checkbox } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
-import { useAppDispatch } from "../../../../redux/store";
-import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
-
-interface Quotation {
-    id: string;
-    quotationDate: string;
-    enquiryDate: string;
-    amount: string;
-    dimensions: string;
-}
+import { Colors } from "../../../../constants/Colors";
+import { useGetQuotationsByEnquiryId } from "../../../../hooks/enquiry/useGetQuotationsByEnquiry";
+import convertDateToString from "../../../../utils/convertDateToString";
+import { displayShortId } from "../../../../utils/displayShortId";
+import { useState } from "react";
+import { useCreateOrder } from "../../../../hooks/enquiry/useCreateQuotation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DataTableProps {
     setFlag: (isCreating: boolean) => void;
+    enquiryId: string;
+    currentStatus: string;
 }
 
-const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
+const DataTable: React.FC<DataTableProps> = ({ setFlag, enquiryId, currentStatus }) => {
+    const queryClient = useQueryClient();
+    const { data } = useGetQuotationsByEnquiryId(enquiryId);
+    const { mutate: createOrder } = useCreateOrder();
 
-    const dispatch = useAppDispatch();
-
-    const quotations: Quotation[] = [
-        {
-            id: "25/02/QT00018",
-            quotationDate: "26 Jan 2025",
-            enquiryDate: "25 Jan 2025",
-            amount: "₹27,000",
-            dimensions: "20 * 20",
-        },
-        {
-            id: "25/02/QT00017",
-            quotationDate: "25 Jan 2025",
-            enquiryDate: "25 Jan 2025",
-            amount: "₹36,000",
-            dimensions: "20 * 20",
-        },
-    ];
+    const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>(null);
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",
@@ -50,35 +35,66 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
         zIndex: 1,
     } as const;
 
+    const handleCheckboxChange = (quotationId: string) => {
+        setSelectedQuotationId((prev) => (prev === quotationId ? null : quotationId));
+    };
+
+    const handleConvertToOrder = () => {
+        if (selectedQuotationId) {
+            const selectedQuotation = data?.data?.find((q: any) => q._id === selectedQuotationId);
+            if (selectedQuotation) {
+                const orderPayload = {
+                    enquiryId,
+                    quotation_id: selectedQuotationId,
+                    products: selectedQuotation.products,
+                    total_amount: selectedQuotation.total_amount,
+                    taxable_amount: selectedQuotation.taxable_amount,
+                    discount: selectedQuotation.discount,
+                    discount_amount: selectedQuotation.discount_amount,
+                    net_amount: selectedQuotation.net_amount,
+                };
+
+                createOrder(orderPayload, {
+                    onSuccess: () => {
+                        queryClient.invalidateQueries({ queryKey: ["enquiries"] });
+                        queryClient.invalidateQueries({ queryKey: ['enquiry-by-id', enquiryId] });
+                        setSelectedQuotationId(null);
+                    },
+                    onError: (error) => console.error("Error creating order:", error),
+                });
+            }
+        }
+    };
+
     return (
         <>
             <Box
                 sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                 }}
             >
-                <Typography sx={{ fontSize: 18, fontWeight: "bold" }} >Quotations</Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: "bold" }}>Quotations</Typography>
                 <Button
                     onClick={() => setFlag(true)}
                     variant="contained"
+                    disabled={currentStatus !== "not_contacted"}
                     sx={{
-                        backgroundColor: '#1D434C',
-                        color: '#FFFFFF',
-                        borderRadius: '8px',
-                        padding: '16px 22px',
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                        fontSize: '14px',
-                        height: '2.5rem',
-                        '&:hover': {
-                            backgroundColor: '#004D40',
+                        backgroundColor: "#1D434C",
+                        color: "#FFFFFF",
+                        borderRadius: "8px",
+                        padding: "16px 22px",
+                        textTransform: "capitalize",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        height: "2.5rem",
+                        "&:hover": {
+                            backgroundColor: "#004D40",
                         },
                     }}
                 >
                     Create Quotation
-
                 </Button>
             </Box>
             <Box
@@ -101,6 +117,9 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                         borderTopLeftRadius: "12px",
                                     }}
                                 >
+                                    Select
+                                </TableCell>
+                                <TableCell align="center" sx={headerCellStyle}>
                                     Quotation ID
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
@@ -124,13 +143,10 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {quotations.length > 0 ? (
-                                quotations.map((row, index) => (
+                            {data?.data?.length > 0 ? (
+                                data?.data?.map((quotation: any, index: number) => (
                                     <TableRow
-                                        onClick={() => {
-                                            dispatch(moveToNextStep());
-                                        }}
-                                        key={row.id}
+                                        key={quotation._id}
                                         sx={{
                                             cursor: "pointer",
                                             backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
@@ -145,17 +161,30 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                             },
                                         }}
                                     >
-                                        <TableCell align="center">{row.id}</TableCell>
-                                        <TableCell align="center">{row.quotationDate}</TableCell>
-                                        <TableCell align="center">{row.enquiryDate}</TableCell>
-                                        <TableCell align="center">{row.amount}</TableCell>
+                                        <TableCell align="center">
+                                            <Checkbox
+                                                checked={selectedQuotationId === quotation._id}
+                                                onChange={() => handleCheckboxChange(quotation._id)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                sx={{
+                                                    color: Colors.primary,
+                                                    "&.Mui-checked": {
+                                                        color: Colors.primary,
+                                                    },
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center">{displayShortId(quotation._id)}</TableCell>
+                                        <TableCell align="center">{convertDateToString(quotation.createdAt)}</TableCell>
+                                        <TableCell align="center">{quotation.enquiry_id.date}</TableCell>
+                                        <TableCell align="center">{quotation.net_amount}</TableCell>
                                         <TableCell align="center">
                                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
                                                 <IconButton
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -165,7 +194,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -175,7 +204,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -187,14 +216,35 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} align="center">
-                                        No data available
+                                    <TableCell colSpan={6} align="center">
+                                        No Quotations available
                                     </TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
                     </Table>
                 </TableContainer>
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                <Button
+                    variant="contained"
+                    onClick={handleConvertToOrder}
+                    disabled={!selectedQuotationId || currentStatus !== "not_contacted"}
+                    sx={{
+                        backgroundColor: selectedQuotationId ? Colors.primary : "#B0BEC5",
+                        color: "#FFFFFF",
+                        borderRadius: "8px",
+                        padding: "8px 16px",
+                        textTransform: "capitalize",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        "&:hover": {
+                            backgroundColor: selectedQuotationId ? "#004D40" : "#B0BEC5",
+                        },
+                    }}
+                >
+                    Convert to Order
+                </Button>
             </Box>
         </>
     );

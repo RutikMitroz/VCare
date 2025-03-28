@@ -6,15 +6,26 @@ import {
   Report as ComplaintsIcon,
   Inventory as InventoryIcon,
   SupervisorAccount as MastersIcon,
-  People as UserManagementIcon,
+  Class as CategoryIcon,
   Payment as PaymentsIcon,
+  Category as ProductIcon,
+  Person as ClientIcon,
+  Group as UserMasterIcon,
+  LocalShipping as SupplierIcon,
 } from '@mui/icons-material';
 import React from 'react';
+
+export interface SubMenuItem {
+  text: string;
+  icon: React.ReactNode;
+  path: string;
+}
 
 export interface MenuItem {
   text: string;
   icon: React.ReactNode;
   path: string;
+  subItems?: SubMenuItem[];
 }
 
 export const menuItems: MenuItem[] = [
@@ -24,7 +35,17 @@ export const menuItems: MenuItem[] = [
   { text: 'Orders', path: '/orders', icon: <OrdersIcon sx={{ fontSize: '18px' }} /> },
   { text: 'Complaints', path: '/complaints', icon: <ComplaintsIcon sx={{ fontSize: '18px' }} /> },
   { text: 'Inventory', path: '/inventory', icon: <InventoryIcon sx={{ fontSize: '18px' }} /> },
-  { text: 'Masters', path: '/masters', icon: <MastersIcon sx={{ fontSize: '18px' }} /> },
-  { text: 'User Management', path: '/users', icon: <UserManagementIcon sx={{ fontSize: '18px' }} /> },
+  {
+    text: 'Masters',
+    path: '/masters',
+    icon: <MastersIcon sx={{ fontSize: '18px' }} />,
+    subItems: [
+      { text: 'Category', path: '/masters/category', icon: <CategoryIcon sx={{ fontSize: '18px' }} /> },
+      { text: 'Product', path: '/masters/product', icon: <ProductIcon sx={{ fontSize: '18px' }} /> },
+      { text: 'Client', path: '/masters/client', icon: <ClientIcon sx={{ fontSize: '18px' }} /> },
+      { text: 'User Master', path: '/masters/user-master', icon: <UserMasterIcon sx={{ fontSize: '18px' }} /> },
+      { text: 'Supplier', path: '/masters/supplier', icon: <SupplierIcon sx={{ fontSize: '18px' }} /> },
+    ]
+  },
   { text: 'Payments', path: '/payments', icon: <PaymentsIcon sx={{ fontSize: '18px' }} /> },
 ]; 

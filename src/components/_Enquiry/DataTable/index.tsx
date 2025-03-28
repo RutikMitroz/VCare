@@ -1,9 +1,8 @@
 import React from "react";
-import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Chip, } from "@mui/material";
-import CustomMenuList from "../../utilities/CustomMenuList";
-import convertDateToString from "../../../utils/convertDateToString";
+import { Table, TableCell, TableContainer, TableHead, TablePagination, TableRow, Box, TableBody, Typography, } from "@mui/material";
 import { displayShortId } from "../../../utils/displayShortId";
 import { useNavigate } from "react-router-dom";
+import { Colors } from "../../../constants/Colors";
 
 interface DataTableProps {
     enquiries: any[];
@@ -25,16 +24,11 @@ const DataTable = ({
     handleChangePage,
     handleChangeRowsPerPage,
 }: DataTableProps) => {
-    const menuDataRef = React.useRef<any | null>(null);
-    const [openMenu, setOpenMenu] = React.useState(false);
-    const [menuAnchorEl, setMenuAnchorEl] = React.useState<HTMLElement | null>(
-        null
-    );
 
     const navigate = useNavigate();
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "capitalize",
@@ -93,7 +87,7 @@ const DataTable = ({
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {enquiries.map((enquiry, index) => (
+                            {enquiries.length > 0 ? (enquiries.map((enquiry, index) => (
                                 <TableRow
                                     onClick={() => navigate(`/enquiry/${enquiry._id}`)}
                                     key={enquiry._id}
@@ -113,29 +107,44 @@ const DataTable = ({
                                     }}
                                 >
                                     <TableCell align="center">{displayShortId(enquiry._id)}</TableCell>
-                                    <TableCell align="center">{convertDateToString(enquiry?.date)}</TableCell>
+                                    <TableCell align="center">{enquiry?.date}</TableCell>
                                     <TableCell align="center">{enquiry.client_id.client_name}</TableCell>
                                     <TableCell align="center">{enquiry.client_id.client_phone}</TableCell>
-                                    <TableCell align="center">{enquiry.assign_to}</TableCell>
+                                    <TableCell align="center">{enquiry.assign_to.user_name}</TableCell>
                                     <TableCell align="center">{enquiry.enquiry_for}</TableCell>
                                     <TableCell align="center">
-                                        <Chip
-                                            label={enquiry.status}
+                                        {/* <Chip
+                                            label={enquiry.status === "not_contacted" ? "Not Contacted" : enquiry.status === "quotation_created" ? "Quotation Created" : enquiry.status === "order_created" ? "Order Created" : enquiry.status}
                                             sx={{
                                                 backgroundColor:
-                                                    enquiry.status === "QUOTATION SENT"
-                                                        ? "#4CAF50"
-                                                        : "#F44336",
+                                                    enquiry.status === "not_contacted"
+                                                        ? "#F44336"
+                                                        : "#4CAF50",
                                                 color: "#FFFFFF",
                                                 fontWeight: "bold",
                                                 fontSize: "12px",
                                                 height: "24px",
                                             }}
-                                        />
+                                        /> */}
+                                        <Typography sx={{
+                                            color:
+                                                enquiry.status === "not_contacted"
+                                                    ? "#F44336"
+                                                    : "#4CAF50",
+                                            fontSize: "14px",
+                                            height: "24px",
+                                        }}>{enquiry.status === "not_contacted" ? "Not Contacted" : enquiry.status === "quotation_created" ? "Quotation Created" : enquiry.status === "order_created" ? "Order Created" : enquiry.status}</Typography>
                                     </TableCell>
                                 </TableRow>
                             ))
-                            }
+
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center">
+                                        No Enquiries available
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -155,22 +164,6 @@ const DataTable = ({
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Box>
-
-            {menuAnchorEl && openMenu && menuDataRef.current && (
-                <CustomMenuList
-                    open={openMenu}
-                    setOpenMenu={setOpenMenu}
-                    menuAnchorEl={menuAnchorEl}
-                    setMenuAnchorEl={setMenuAnchorEl}
-                    menuItems={[
-                        {
-                            title: "More details",
-                            iconImage: "/assets/icons/more_details.png",
-                            // fn: () => navigate(`/enquiries/${menuDataRef.current?._id ?? ""}`),
-                        },
-                    ]}
-                />
-            )}
         </>
     );
 };

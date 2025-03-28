@@ -9,6 +9,7 @@ import {
     Box,
     TableBody,
 } from "@mui/material";
+import { Colors } from "../../../constants/Colors";
 
 interface OrderItem {
     srNo: string;
@@ -40,7 +41,7 @@ const DataTable = ({
     handleChangeRowsPerPage,
 }: DataTableProps) => {
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontWeight: "bold",
         fontSize: "14px",

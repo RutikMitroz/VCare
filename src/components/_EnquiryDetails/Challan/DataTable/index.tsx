@@ -2,8 +2,7 @@ import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, 
 import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
-import { useAppDispatch } from "../../../../redux/store";
-import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
+import { Colors } from "../../../../constants/Colors";
 
 interface challan {
     challanId: string;
@@ -17,8 +16,6 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
-
-    const dispatch = useAppDispatch();
     const challans: challan[] = [
         {
             challanId: "25/02/QT00018",
@@ -35,7 +32,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
     ];
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",
@@ -147,7 +144,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -157,7 +154,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -167,7 +164,7 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                                                     sx={{
                                                         color: "#424242",
                                                         "&:hover": {
-                                                            color: "#00695C",
+                                                            color: Colors.primary,
                                                         },
                                                     }}
                                                 >
@@ -190,7 +187,6 @@ const DataTable: React.FC<DataTableProps> = ({ setFlag }) => {
                 <Box sx={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
                     <Button
                         variant="contained"
-                        onClick={() => dispatch(moveToNextStep())}
                         sx={{
                             backgroundColor: '#1D434C',
                             color: '#FFFFFF',

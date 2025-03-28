@@ -1,11 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import progressBarReducer from "./progressBar/progressBarSlice";
 
 export const store = configureStore({
-  reducer: {
-    progressBar: progressBarReducer,
-  },
+  reducer: {},
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,41 +1,24 @@
 import { Table, TableCell, TableContainer, TableHead, TableRow, Box, TableBody, Button, } from "@mui/material";
 import OrderIdAndDateCard from "../../../ui/Cards/OrderIdAndDateCard";
-import { useAppDispatch } from "../../../../redux/store";
-import { moveToNextStep } from "../../../../redux/progressBar/progressBarSlice";
+import { Colors } from "../../../../constants/Colors";
+import convertDateToString from "../../../../utils/convertDateToString";
+import { displayShortId } from "../../../../utils/displayShortId";
+import { useUpdateEnquiry } from "../../../../hooks/enquiry/useUpdateEnquiry";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface Quotation {
-    id: string;
-    products: string;
-    qty: string;
-    hsnNo: string;
-    unit: string;
-    rate: string;
+interface DataTableProps {
+    orderDetails: any;
+    enquiryId: string;
+    currentStatus: string;
 }
 
-const DataTable = () => {
+const DataTable = ({ orderDetails, enquiryId, currentStatus }: DataTableProps) => {
 
-    const dispatch = useAppDispatch();
-    const quotations: Quotation[] = [
-        {
-            id: "25/02/QT00018",
-            products: "Hikvision 5MP CCTV Camera",
-            qty: "10",
-            hsnNo: "₹75ut4",
-            unit: "20",
-            rate: "₹36,000",
-        },
-        {
-            id: "25/02/QT00018",
-            products: "Hikvision 5MP CCTV Camera",
-            qty: "70",
-            hsnNo: "₹75tyt4",
-            unit: "10",
-            rate: "₹65,000",
-        },
-    ];
+    const { mutate } = useUpdateEnquiry();
+    const queryClient = useQueryClient();
 
     const headerCellStyle = {
-        backgroundColor: "#1D434C",
+        backgroundColor: Colors.primary,
         color: "#FFFFFF",
         fontSize: "14px",
         textTransform: "Capitalize",
@@ -56,11 +39,24 @@ const DataTable = () => {
                 }}
             >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <OrderIdAndDateCard label="Order ID" value="25/02/QT00018" />
-                    <OrderIdAndDateCard label="Order Date" value="25 Jan 2025" />
+                    <OrderIdAndDateCard label="Order ID" value={orderDetails?._id} />
+                    <OrderIdAndDateCard label="Order Date" value={convertDateToString(orderDetails?.createdAt)} />
                 </Box>
                 <Button
-                    onClick={() => dispatch(moveToNextStep())}
+                    disabled={currentStatus !== "quotation_created"}
+                    onClick={() => {
+                        mutate({
+                            enquiryId: enquiryId,
+                            enquiryData: {
+                                status: "order_created"
+                            }
+                        }, {
+                            onSuccess: () => {
+                                queryClient.invalidateQueries({ queryKey: ['enquiries'] });
+                                queryClient.invalidateQueries({ queryKey: ['enquiry-by-id', enquiryId] });
+                            }
+                        })
+                    }}
                     variant="contained"
                     sx={{
                         backgroundColor: '#1D434C',
@@ -103,31 +99,31 @@ const DataTable = () => {
                                     Sr No.
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
-                                    Products
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
-                                    Qty.
-                                </TableCell>
-                                <TableCell align="center" sx={headerCellStyle}>
-                                    HSN No.
+                                    Product Name
                                 </TableCell>
                                 <TableCell align="center" sx={headerCellStyle}>
                                     Unit
+                                </TableCell>
+                                <TableCell align="center" sx={headerCellStyle}>
+                                    Rate
+                                </TableCell>
+                                <TableCell align="center" sx={headerCellStyle}>
+                                    Quantity
                                 </TableCell>
                                 <TableCell align="center" sx={{
                                     ...headerCellStyle,
                                     borderTopRightRadius: "12px",
                                 }}>
-                                    Rate
+                                    Total Amount
                                 </TableCell>
 
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {quotations.length > 0 ? (
-                                quotations.map((row, index) => (
+                            {orderDetails?.quotation_id?.products?.length > 0 ? (
+                                orderDetails?.quotation_id?.products?.map((product: any, index: number) => (
                                     <TableRow
-                                        key={row.id}
+                                        key={product?._id}
                                         sx={{
                                             backgroundColor: index % 2 === 0 ? "#F5F7FA" : "#FFFFFF",
                                             "&:hover": {
@@ -141,18 +137,19 @@ const DataTable = () => {
                                             },
                                         }}
                                     >
-                                        <TableCell align="center">{row.id}</TableCell>
-                                        <TableCell align="center">{row.products}</TableCell>
-                                        <TableCell align="center">{row.qty}</TableCell>
-                                        <TableCell align="center">{row.hsnNo}</TableCell>
-                                        <TableCell align="center">{row.unit}</TableCell>
-                                        <TableCell align="center">{row.rate}</TableCell>
+                                        <TableCell align="center">{displayShortId(product?.product_id)}</TableCell>
+                                        <TableCell align="center">{product?.product_name}</TableCell>
+                                        <TableCell align="center">{product?.unit}</TableCell>
+                                        <TableCell align="center">{product?.unit_price
+                                        }</TableCell>
+                                        <TableCell align="center">{product?.quantity}</TableCell>
+                                        <TableCell align="center">{product?.total_amount}</TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={5} align="center">
-                                        No data available
+                                        No products available
                                     </TableCell>
                                 </TableRow>
                             )}

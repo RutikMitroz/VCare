@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box } from "@mui/material";
 import ClientDetailsCard from "../ui/Cards/ClientDetailsCard";
 import EnquiryDetailsCard from "../ui/Cards/EnquiryDetailsCard";
@@ -5,42 +6,64 @@ import ActivityCard from "../ui/Cards/ActivityCard";
 import ProgressBar from "../ui/ProgressBar";
 import Quotation from "./Quotatiion";
 import Order from "./Order";
-import { useAppSelector } from "../../redux/store";
 import Challan from "./Challan";
 import Invoice from "./Invoice";
 import { useGetEnquiryById } from "../../hooks/enquiry/useGetEnquiryById";
 import { useParams } from "react-router-dom";
 
 const RenderEnquiryDetails = () => {
-
     const { enquiryId } = useParams<{ enquiryId: string }>();
-
     const { data } = useGetEnquiryById(enquiryId || "");
+    const [displayedStep, setDisplayedStep] = useState<number | null>(null);
 
-    const activeStep = useAppSelector((state) => state.progressBar.activeStep);
+    const renderComponent = () => {
+        const enquiryDetails = data?.data;
 
-    const stepComponents = [
-        <Quotation key="quotation" />,
-        <Order key="order" />,
-        <Challan key="challan" />,
-        <Invoice key="invoice" />,
-    ];
+        const stepToDisplay = displayedStep !== null ? displayedStep : getActiveStep();
 
-    const currentComponent =
-        activeStep >= 0 && activeStep < stepComponents.length
-            ? stepComponents[activeStep]
-            : <div>Unknown Step</div>;
+        switch (stepToDisplay) {
+            case 0:
+                return <Quotation enquiryDetails={enquiryDetails} />;
+            case 1:
+                return <Order enquiryDetails={enquiryDetails} />;
+            case 2:
+                return <Challan enquiryDetails={enquiryDetails} />;
+            case 3:
+                return <Invoice enquiryDetails={enquiryDetails} />;
+            default:
+                return <Quotation enquiryDetails={enquiryDetails} />;
+        }
+    };
 
+    const getActiveStep = () => {
+        const enquiryDetails = data?.data;
+        const hasQuotations = enquiryDetails?.status === "quotation_created";
+        const hasOrders = enquiryDetails?.status === "order_created";
+        const hasChallans = enquiryDetails?.status === "challan_created";
+
+        if (hasChallans) return 3;
+        if (hasOrders) return 2;
+        if (hasQuotations) return 1;
+        return 0;
+    };
+
+    const handleStepClick = (step: number) => {
+        setDisplayedStep(step);
+    };
 
     return (
         <Box sx={{ width: "100%", display: "flex", gap: 2 }}>
             <Box sx={{ width: "20%", display: "flex", flexDirection: "column", gap: 2 }}>
                 <ClientDetailsCard clientDetails={data?.data?.client_id} />
-                <EnquiryDetailsCard />
+                <EnquiryDetailsCard enquiryDetails={data?.data} />
             </Box>
             <Box sx={{ width: "60%", display: "flex", flexDirection: "column", gap: 2 }}>
-                <ProgressBar />
-                {currentComponent}
+                <ProgressBar
+                    enquiryDetails={data?.data}
+                    displayedStep={displayedStep !== null ? displayedStep : getActiveStep()}
+                    onStepClick={handleStepClick}
+                />
+                {data?.data && renderComponent()}
             </Box>
             <Box sx={{ width: "20%" }}>
                 <ActivityCard />

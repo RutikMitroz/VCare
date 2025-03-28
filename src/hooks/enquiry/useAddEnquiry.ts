@@ -12,7 +12,7 @@ const addEnquiry = async (enquiryData: any) => {
     }>({
       method: "POST",
       pathname: ADD_ENQUIRY,
-      token: true,
+      // token: true,
       values: enquiryData,
       showMessage: true,
       show_success_message: true,

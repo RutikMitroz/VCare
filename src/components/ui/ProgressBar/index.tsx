@@ -3,7 +3,6 @@ import {
     Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
 
 const CustomConnector = styled(StepConnector)(() => ({
     [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -28,8 +27,8 @@ const CustomConnector = styled(StepConnector)(() => ({
     },
 }));
 
-const CustomStepIcon = (props: { active: boolean; completed: boolean }) => {
-    const { active, completed } = props;
+const CustomStepIcon = (props: { active: boolean; completed: boolean; displayed: boolean }) => {
+    const { active, completed, displayed } = props;
 
     return (
         <Box
@@ -39,7 +38,7 @@ const CustomStepIcon = (props: { active: boolean; completed: boolean }) => {
                 borderRadius: "50%",
                 backgroundColor: completed
                     ? "#4CAF50"
-                    : active
+                    : active || displayed
                         ? "#FF9800"
                         : "#B0BEC5",
                 display: "flex",
@@ -50,16 +49,47 @@ const CustomStepIcon = (props: { active: boolean; completed: boolean }) => {
                 fontWeight: "bold",
             }}
         >
-            {completed ? "✔" : active ? "●" : "○"}
+            {completed ? "✔" : active || displayed ? "●" : "○"}
         </Box>
     );
 };
 
-const ProgressBar = () => {
+interface ProgressBarProps {
+    enquiryDetails: any;
+    displayedStep: number;
+    onStepClick: (step: number) => void;
+}
+
+const ProgressBar = ({ enquiryDetails, displayedStep, onStepClick }: ProgressBarProps) => {
     const steps = ["Quotations", "Order", "Challan", "Invoice"];
-    const activeStep = useAppSelector((state) => state.progressBar.activeStep);
-    const completedSteps = useAppSelector((state) => state.progressBar.completedSteps);
-    const dispatch = useAppDispatch();
+
+    const getProgress = () => {
+        const hasQuotations = enquiryDetails?.status === "quotation_created";
+        const hasOrders = enquiryDetails?.status === "order_created";
+        const hasChallans = enquiryDetails?.status === "challan_created";
+        const hasInvoices = enquiryDetails?.status === "invoice_created";
+
+        if (hasInvoices) {
+            return { activeStep: 3, completedSteps: [0, 1, 2, 3] };
+        } else if (hasChallans) {
+            return { activeStep: 3, completedSteps: [0, 1, 2] };
+        } else if (hasOrders) {
+            return { activeStep: 2, completedSteps: [0, 1] };
+        } else if (hasQuotations) {
+            return { activeStep: 1, completedSteps: [0] };
+        } else {
+            return { activeStep: 0, completedSteps: [] };
+        }
+    };
+
+    const { activeStep, completedSteps } = getProgress();
+
+    const handleStepClick = (index: number) => {
+        // Allow clicking only on completed steps or the active step
+        if (completedSteps.includes(index) || index === activeStep) {
+            onStepClick(index);
+        }
+    };
 
     return (
         <Box sx={{ width: "100%", backgroundColor: "white", borderRadius: "16px", border: "1px solid black" }}>
@@ -74,16 +104,27 @@ const ProgressBar = () => {
                 }}
             >
                 {steps.map((label, index) => (
-                    <Step key={label} completed={completedSteps.includes(index)}>
+                    <Step
+                        key={label}
+                        completed={completedSteps.includes(index)}
+                        onClick={() => handleStepClick(index)}
+                        sx={{ cursor: completedSteps.includes(index) || index === activeStep ? "pointer" : "default" }}
+                    >
                         <StepLabel
-                            StepIconComponent={CustomStepIcon}
+                            StepIconComponent={(props) => (
+                                <CustomStepIcon
+                                    active={props.active ?? false}
+                                    completed={props.completed ?? false}
+                                    displayed={index === displayedStep}
+                                />
+                            )}
                             sx={{
                                 "& .MuiStepLabel-label": {
                                     fontSize: "14px",
                                     fontWeight: "bold",
                                     color: completedSteps.includes(index)
                                         ? "#4CAF50"
-                                        : index === activeStep
+                                        : index === activeStep || index === displayedStep
                                             ? "#FF9800"
                                             : "#B0BEC5",
                                     marginTop: "8px",
@@ -95,7 +136,6 @@ const ProgressBar = () => {
                     </Step>
                 ))}
             </Stepper>
-            {/* Removed Back and Next buttons since progress will be controlled by actions */}
         </Box>
     );
 };
