@@ -50,3 +50,6 @@ export const ADD_GRN = "api/inventory/addInventory";
 
 //complaints
 export const GET_ALL_COMPLAINTS="api/complaint/get";
+export const ADD_COMPLAINT="api/complaint/add";
+export const GET_COMPLAINT_BY_ID = (complaintId: string) =>
+  `api/complaint/get/${complaintId}`;
