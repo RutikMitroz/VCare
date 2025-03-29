@@ -6,3 +6,4 @@ export const Colors = {
   yellow: "#F59E0B",
   purple: "#8B5CF6",
 };
+

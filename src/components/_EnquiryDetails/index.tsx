@@ -55,7 +55,7 @@ const RenderEnquiryDetails = () => {
         <Box sx={{ width: "100%", display: "flex", gap: 2 }}>
             <Box sx={{ width: "20%", display: "flex", flexDirection: "column", gap: 2 }}>
                 <ClientDetailsCard clientDetails={data?.data?.client_id} />
-                <EnquiryDetailsCard enquiryDetails={data?.data} />
+                <EnquiryDetailsCard enquiryDetails={data?.data} Type="Enquiry" />
             </Box>
             <Box sx={{ width: "60%", display: "flex", flexDirection: "column", gap: 2 }}>
                 <ProgressBar

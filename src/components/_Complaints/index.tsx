@@ -91,7 +91,7 @@ const RenderComplaints = () => {
           />
           <Button
             variant="contained"
-            onClick={() => navigate("/inventory/add-grn")}
+            onClick={() => navigate("/complaints/add-complaints")}
             size="small"
             startIcon={<AddIcon sx={{ fontSize: '16px' }} />}
             sx={{

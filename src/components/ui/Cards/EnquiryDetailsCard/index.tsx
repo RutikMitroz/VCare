@@ -8,7 +8,7 @@ interface EnquiryDetailsCardProps {
     enquiryDetails: any;
 }
 
-const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
+const EnquiryDetailsCard = ({ enquiryDetails,Type }: EnquiryDetailsCardProps) => {
     return (
         <Card
             sx={{
@@ -41,7 +41,7 @@ const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
                             color: "#424242",
                         }}
                     >
-                        Enquiry Details
+                        {Type==="Complaint"?"Complaint Detail":"Enquiry Details"}
                     </Typography>
                 </Box>
                 <IconButton
@@ -77,7 +77,7 @@ const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
                             color: Colors.primary,
                         }}
                     >
-                        {enquiryDetails?.enquiry_for}
+                        {Type==="Complaints"?enquiryDetails?.category||"":enquiryDetails?.enquiry_for||""}
                     </Typography>
                 </Box>
                 <Typography
@@ -87,7 +87,7 @@ const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
                         marginLeft: "20px",
                     }}
                 >
-                    {enquiryDetails?.enquiry_description}
+                    {enquiryDetails?.enquiry_description||""}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                     <PersonIcon
@@ -103,7 +103,7 @@ const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
                             color: Colors.primary,
                         }}
                     >
-                        {enquiryDetails?.assign_to?.user_name}
+                        {enquiryDetails?.assign_to?.user_name||""}
                     </Typography>
                 </Box>
                 <Typography
@@ -112,7 +112,7 @@ const EnquiryDetailsCard = ({ enquiryDetails }: EnquiryDetailsCardProps) => {
                         color: Colors.primary,
                     }}
                 >
-                    {enquiryDetails?.date}
+                    {enquiryDetails?.date||""}
                 </Typography>
             </Box>
         </Card>

@@ -18,6 +18,7 @@ import Supplier from "./pages/Master/Supplier";
 import AddGRN from "./pages/AddGRN";
 import ComplaintsDetails from "./pages/ComplaintsDetails";
 import Category from "./pages/Master/Category";
+import AddComplaints from "./pages/Complaints/AddComplaints";
 
 function App() {
   window.addEventListener("vite:preloadError", () => {
@@ -38,8 +39,11 @@ function App() {
             <Route path="/orders" element={<Order />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/reports" element={<Reports />} />
+            {/* Complaints Routes */}
             <Route path="/complaints" element={<Complaints />} />
-            <Route path="/complaints/:id" element={<ComplaintsDetails/>} />
+            <Route path="/complaints/add-complaints" element={<AddComplaints/>} />
+            <Route path="/complaints/:complaintsId" element={<ComplaintsDetails/>} />
+
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/inventory/add-grn" element={<AddGRN />} />
             <Route path="/payments" element={<Payments />} />
