@@ -104,7 +104,7 @@ const DataTable = ({
                                 >
                                     <TableCell align="center">{displayShortId(product._id)}</TableCell>
                                     <TableCell align="center">{product?.product_name}</TableCell>
-                                    <TableCell align="center">{product?.product_category}</TableCell>
+                                    <TableCell align="center">{product?.product_category?.category_name}</TableCell>
                                     <TableCell align="center">{product?.quantity}</TableCell>
                                     <TableCell align="center">
                                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>

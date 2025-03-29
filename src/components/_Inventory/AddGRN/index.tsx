@@ -112,7 +112,7 @@ const RenderAddGRN = () => {
         if (selectedProduct) {
             formik.setFieldValue("productId", selectedProduct._id || "");
             formik.setFieldValue("productName", selectedProduct.product_name || "");
-            formik.setFieldValue("category", selectedProduct.product_category || "");
+            formik.setFieldValue("category", selectedProduct.product_category.category_name || "");
             formik.setFieldValue("unit", selectedProduct.unit || "");
             formik.setFieldValue("purchased_price", selectedProduct.unit_price || "");
         } else {

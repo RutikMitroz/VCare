@@ -1,10 +1,10 @@
 {
   "name": "v-care",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 4001",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

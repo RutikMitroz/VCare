@@ -1,4 +1,4 @@
-import { Formik, Form, Field, FieldArray } from "formik";
+import { Formik, Form, Field, FieldArray, useFormikContext } from "formik";
 import * as Yup from "yup";
 import {
     Box, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead,
@@ -7,7 +7,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Colors } from "../../../../constants/Colors";
 import { useGetOrderByEnquiryId } from "../../../../hooks/enquiry/useGetOrderByEnquiry";
 import { useGetAllUsers } from "../../../../hooks/enquiry/useGetAllUsers";
@@ -15,7 +15,6 @@ import { useAddChallan } from "../../../../hooks/enquiry/useAddChallan";
 import { useGetProductByBarCode } from "../../../../hooks/enquiry/useGetProductByBarCode";
 
 interface Product {
-    _id: string;
     product_barcode: string;
     product_name: string;
     quantity: string;
@@ -37,7 +36,6 @@ const validationSchema = Yup.object({
     products: Yup.array()
         .of(
             Yup.object({
-                _id: Yup.string().required("Product Id is required"),
                 product_barcode: Yup.string().required("Bar Code is required"),
                 product_name: Yup.string().required("Product is required"),
                 quantity: Yup.number()
@@ -50,13 +48,37 @@ const validationSchema = Yup.object({
 });
 
 const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryDetails }) => {
-    const [barcode, setBarcode] = useState("");
     const [currentProductIndex, setCurrentProductIndex] = useState<number | null>(null);
+    const [barcodeInput, setBarcodeInput] = useState("");
+    const [debouncedBarcode, setDebouncedBarcode] = useState("");
 
     const { data } = useGetOrderByEnquiryId(enquiryDetails?._id);
     const { data: userList } = useGetAllUsers();
-    const { data: productData, isFetching } = useGetProductByBarCode(barcode);
+    const { data: productData, isFetching } = useGetProductByBarCode(debouncedBarcode);
     const { mutate } = useAddChallan();
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedBarcode(barcodeInput), 500);
+        return () => clearTimeout(timer);
+    }, [barcodeInput]);
+
+    useEffect(() => {
+        if (productData && currentProductIndex !== null) {
+            setFieldValue(`products[${currentProductIndex}].product_name`, productData.product_name);
+            setFieldValue(`products[${currentProductIndex}].unit`, productData.unit);
+            setFieldValue(`products[${currentProductIndex}]._id`, productData._id);
+        }
+    }, [productData, currentProductIndex]);
+
+    const handleBarcodeChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, setFieldValue: any) => {
+        const value = e.target.value;
+        setCurrentProductIndex(index);
+        setBarcodeInput(value);
+        setFieldValue(`products[${index}].product_barcode`, value);
+        // Reset other fields when barcode changes
+        setFieldValue(`products[${index}].product_name`, "");
+        setFieldValue(`products[${index}].unit`, "");
+    };
 
     const initialValues: FormValues = {
         products: [],
@@ -67,15 +89,6 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedAssignTo, setSelectedAssignTo] = useState<string[]>([]);
     const open = Boolean(anchorEl);
-
-    useEffect(() => {
-        if (productData && currentProductIndex !== null) {
-            const product = productData.data;
-            if (product) {
-                console.log(`Filling product details for index ${currentProductIndex}:`, product);
-            }
-        }
-    }, [productData, currentProductIndex]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -93,44 +106,45 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
         );
     };
 
+    const selectedUserNames = userList
+        ?.filter((user: any) => selectedAssignTo.includes(user._id))
+        ?.map((user: any) => user.user_name) || [];
+
     const handleSubmit = (values: FormValues) => {
-        const productList = values?.products?.map((product) => product?._id);
+        const productList = values.products.map((product) => ({
+            product_id: product._id,
+            quantity: product.quantity,
+            barcode: product.product_barcode
+        }));
+
         const challanData = {
-            enquiry_id: values?.enquiry_id,
-            order_id: values?.order_id,
+            enquiry_id: values.enquiry_id,
+            order_id: values.order_id,
             products: productList,
             assign_to: selectedAssignTo,
         };
+
         mutate(challanData, {
             onSuccess: () => {
                 setFlag(false);
             },
         });
-    }
-
-    const selectedUserNames = userList
-        ?.filter((user: any) => selectedAssignTo.includes(user._id))
-        ?.map((user: any) => user.user_name) || [];
-
-    // Handle barcode input change
-    const handleBarcodeChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const value = e.target.value;
-        setCurrentProductIndex(index);
-        setBarcode(value);
     };
 
-    // Handle adding a new product
-    const handleAddProduct = (push: (obj: any) => void) => {
-        push({
-            product_barcode: "",
-            _id: "",
-            product_name: "",
-            quantity: "",
-            unit: "",
-        });
-        setBarcode("");
-        setCurrentProductIndex(null);
-    };
+    const handleAddProduct = (push: (obj: any) => void, values: FormValues) => {
+            const newIndex = values.products.length;
+            push({
+                product_barcode: "",
+                product_name: "",
+                quantity: "1",
+                unit: "",
+            });
+            setTimeout(() => {
+                const input = document.querySelector(`input[name='products[${newIndex}].product_barcode']`);
+                if (input) (input as HTMLElement).focus();
+            }, 100);
+        };
+
     return (
         <Box>
             <Box
@@ -248,9 +262,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={(values) => {
-                    console.log(values);
-                }}
+                onSubmit={handleSubmit}
             >
                 {({ values, errors, touched, setFieldValue }) => (
                     <Form>
@@ -261,7 +273,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                         <Table>
                                             <TableHead>
                                                 <TableRow sx={{ bgcolor: Colors.primary }}>
-                                                    {["BarCode", "Product Id", "Product Name", "Qty.", "Unit", "Action"].map((header) => (
+                                                    {["BarCode", "Product Name", "Qty.", "Unit", "Action"].map((header) => (
                                                         <TableCell
                                                             key={header}
                                                             sx={{
@@ -304,36 +316,14 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                     ) : null
                                                                 }
                                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                    handleBarcodeChange(e, index);
-                                                                    setFieldValue(`products[${index}].product_barcode`, e.target.value);
+                                                                    handleBarcodeChange(e, index, setFieldValue);
                                                                 }}
+                                                                value={product.product_barcode}
+                                                                disabled={isFetching && currentProductIndex === index}
                                                             />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}]._id`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
-                                                                }}
-                                                                error={
-                                                                    touched.products?.[index]?._id && !!errors.products?.[index]?._id
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?._id && errors.products?.[index]?._id ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index]._id}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                                value={product._id}
-                                                            />
+                                                            {isFetching && currentProductIndex === index && (
+                                                                <Typography variant="caption">Loading product...</Typography>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
                                                             <Field
@@ -361,6 +351,38 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                     ) : null
                                                                 }
                                                                 value={product.product_name}
+                                                                InputProps={{
+                                                                    readOnly: true,
+                                                                }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell sx={{ padding: "8px" }}>
+                                                            <Field
+                                                                as={TextField}
+                                                                name={`products[${index}].unit`}
+                                                                size="small"
+                                                                variant="outlined"
+                                                                fullWidth
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": {
+                                                                        fontSize: "14px",
+                                                                        borderRadius: "8px",
+                                                                    },
+                                                                }}
+                                                                error={
+                                                                    touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
+                                                                }
+                                                                helperText={
+                                                                    touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
+                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
+                                                                            {errors.products[index].unit}
+                                                                        </Typography>
+                                                                    ) : null
+                                                                }
+                                                                value={product.unit}
+                                                                InputProps={{
+                                                                    readOnly: true,
+                                                                }}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -390,32 +412,9 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                                     ) : null
                                                                 }
                                                                 value={product.quantity}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell sx={{ padding: "8px" }}>
-                                                            <Field
-                                                                as={TextField}
-                                                                name={`products[${index}].unit`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                sx={{
-                                                                    "& .MuiInputBase-root": {
-                                                                        fontSize: "14px",
-                                                                        borderRadius: "8px",
-                                                                    },
+                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                    setFieldValue(`products[${index}].quantity`, e.target.value);
                                                                 }}
-                                                                error={
-                                                                    touched.products?.[index]?.unit && !!errors.products?.[index]?.unit
-                                                                }
-                                                                helperText={
-                                                                    touched.products?.[index]?.unit && errors.products?.[index]?.unit ? (
-                                                                        <Typography sx={{ color: "red", fontSize: "12px" }}>
-                                                                            {errors.products[index].unit}
-                                                                        </Typography>
-                                                                    ) : null
-                                                                }
-                                                                value={product.unit}
                                                             />
                                                         </TableCell>
                                                         <TableCell sx={{ padding: "8px" }}>
@@ -437,7 +436,7 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                                 <TableRow>
                                                     <TableCell colSpan={7} sx={{ textAlign: "right", padding: "8px", paddingRight: "22px" }}>
                                                         <IconButton
-                                                            onClick={() => handleAddProduct(push)}
+                                                            onClick={() => handleAddProduct(push, values)}
                                                             sx={{
                                                                 backgroundColor: "#2196F3",
                                                                 color: "#FFFFFF",
@@ -453,7 +452,44 @@ const CreateChallanForm: React.FC<CreateChallanFormProps> = ({ setFlag, enquiryD
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
-                                    {/* ... (rest of the JSX remains the same) ... */}
+                                    <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            sx={{
+                                                backgroundColor: Colors.primary,
+                                                color: "#FFFFFF",
+                                                borderRadius: "8px",
+                                                padding: "8px 24px",
+                                                textTransform: "capitalize",
+                                                fontSize: "14px",
+                                                fontWeight: "bold",
+                                                "&:hover": {
+                                                    backgroundColor: "#004D40",
+                                                },
+                                            }}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            onClick={() => setFlag(false)}
+                                            variant="contained"
+                                            sx={{
+                                                backgroundColor: "#E0E0E0",
+                                                color: "#424242",
+                                                borderRadius: "8px",
+                                                padding: "8px 24px",
+                                                textTransform: "capitalize",
+                                                fontSize: "14px",
+                                                fontWeight: "bold",
+                                                "&:hover": {
+                                                    backgroundColor: "#B0BEC5",
+                                                },
+                                            }}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </Box>
                                 </>
                             )}
                         </FieldArray>
